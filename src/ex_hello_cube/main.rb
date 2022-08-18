@@ -2,6 +2,7 @@
 # Licensed under the MIT license
 
 require 'sketchup.rb'
+require_relative '../win32/pipe'
 
 module Examples
   module HelloCube
