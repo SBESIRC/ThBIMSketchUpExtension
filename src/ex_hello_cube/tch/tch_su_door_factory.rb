@@ -1,62 +1,23 @@
 require 'sketchup.rb'
 
 module Examples
-  module HelloCube
+  module ThTCH2SUDoorFactory
+    module_function
 
-    class ThTCH2SUDoorFactory
-        def self.create_door(model, tch_door)
-        end
-
-        private
-
-        def self.profile(model, tch_door)
-
-        end
+    def create_door(model, tch_door)
+      #
     end
 
+    def create_face(entities, tch_door)
+      var pts = [
+        Geom::Point3d.new(-tch_door.length/2.0, -tch_door.width/2.0, 0.0)
+        Geom::Point3d.new(-tch_door.length/2.0, tch_door.width/2.0, 0.0)
+        Geom::Point3d.new(tch_door.length/2.0, tch_door.width/2.0, 0.0)
+        Geom::Point3d.new(tch_door.length/2.0, -tch_door.width/2.0, 0.0)
+      ]
+      face = entities.add_face(pts)
+      face.transform!(ThTCH2SUGeomUtil.multiple_transformations(1.0, tch_door.x_vector, tch_door.origin))
+    end
 
-
-    # class Person
-    #   # extend/include/prepend go first
-    #   extend SomeModule
-    #   include AnotherModule
-    #   prepend YetAnotherModule
-
-    #   # inner classes
-    #   CustomError = Class.new(StandardError)
-
-    #   # constants are next
-    #   SOME_CONSTANT = 20
-
-    #   # afterwards we have attribute macros
-    #   attr_reader :name
-
-    #   # followed by other macros (if any)
-    #   validates :name
-
-    #   # public class methods are next in line
-    #   def self.some_method
-    #   end
-
-    #   # initialization goes between class methods and other instance methods
-    #   def initialize
-    #   end
-
-    #   # followed by other public instance methods
-    #   def some_method
-    #   end
-
-    #   # protected and private methods are grouped near the end
-    #   protected
-
-    #   def some_protected_method
-    #   end
-
-    #   private
-
-    #   def some_private_method
-    #   end
-    # end
   end # module HelloCube
 end # module Examples
-
