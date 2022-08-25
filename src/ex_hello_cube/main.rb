@@ -1,5 +1,7 @@
 # Copyright 2016-2022 Trimble Inc
 # Licensed under the MIT license
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 require 'sketchup.rb'
 require 'google/protobuf'
 require_relative 'data/ThTCHBuildingData_pb'
@@ -41,7 +43,7 @@ module Examples
       model.start_operation('Create Cube', true)
       group = model.active_entities.add_group
       entities = group.entities
-      pt1_x = 
+      pt1_x =
       points = [
         Geom::Point3d.new(data.origin.x + data.width / 2, data.origin.y + data.length / 2, 0),
         Geom::Point3d.new(data.origin.x - data.width / 2, data.origin.y + data.length / 2, 0),
@@ -61,7 +63,7 @@ module Examples
       # contents = File.open("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin", "r") { |f| f.read }
       # data = contents
       # s = IO.read("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin")
-      
+
       # data1 = File.read("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin")
       # model = ThTCHBuildingData.decode(data)
       # value = ThTCH2SUBuildingBuilder.Building(model)
