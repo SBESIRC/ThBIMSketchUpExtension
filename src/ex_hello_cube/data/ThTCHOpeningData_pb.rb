@@ -3,7 +3,7 @@
 
 require 'google/protobuf'
 
-require_relative 'ThTCHBuiltElementData_pb'
+require 'ThTCHBuiltElementData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHOpeningData.proto", :syntax => :proto3) do
