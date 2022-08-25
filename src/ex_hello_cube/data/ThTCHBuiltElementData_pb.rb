@@ -3,8 +3,8 @@
 
 require 'google/protobuf'
 
-require 'ThTCHRootData_pb'
-require 'ThTCHGeometry_pb'
+require_relative 'ThTCHRootData_pb'
+require_relative 'ThTCHGeometry_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHBuiltElementData.proto", :syntax => :proto3) do
@@ -13,11 +13,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :length, :double, 2
       optional :width, :double, 3
       optional :height, :double, 4
-      optional :z_offset, :double, 5
-      optional :origin, :message, 6, "ThTCHPoint3d"
-      optional :x_vector, :message, 7, "ThTCHVector3d"
-      optional :extruded_direction, :message, 8, "ThTCHVector3d"
-      proto3_optional :outline, :message, 9, "ThTCHPolyline"
+      optional :origin, :message, 5, "ThTCHPoint3d"
+      optional :x_vector, :message, 6, "ThTCHVector3d"
+      proto3_optional :outline, :message, 7, "ThTCHPolyline"
     end
   end
 end

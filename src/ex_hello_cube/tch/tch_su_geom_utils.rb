@@ -1,5 +1,5 @@
 require 'sketchup.rb'
-require 'ThTCH2SUGeomUtil'
+# require 'ThTCH2SUGeomUtil'
 
 module Examples
   module ThTCH2SUGeomUtil
@@ -32,12 +32,16 @@ module Examples
     #   translation_trans * rotation_trans * scale_trans
     # end
 
+    def double_transformations(origin, direction)
+      translation_trans = Geom::Transformation.new(origin, direction)
+    end
+
     def multiple_transformations(scale, direction, origin)
       # https://forums.sketchup.com/t/tranformation-move-and-rotate/154112
-      var x_axis = Geom::Vector3d.new(1, 0, 0)
-      var scale_trans = Geom::Transformation.scaling(scale, scale, scale)
-      var rotation_trans = find_rotation_transformation(direction, x_axis)
-      var translation_trans = Geom::Transformation.translation(origin)
+      x_axis = Geom::Vector3d.new(1, 0, 0)
+      scale_trans = Geom::Transformation.scaling(scale, scale, scale)
+      rotation_trans = find_rotation_transformation(direction, x_axis)
+      translation_trans = Geom::Transformation.translation(origin)
       translation_trans * rotation_trans * scale_trans
     end
 

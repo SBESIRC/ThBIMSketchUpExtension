@@ -173,6 +173,20 @@ module Win32
       end
     end
 
+    # Reads data from the pipe. You can read data from either end of a named
+    # pipe.
+    #
+    def readCadPipeData(read_size = @ffi_buffer.size)
+      bytes = FFI::MemoryPointer.new(:ulong)
+      raise Error, "no pipe created" unless @pipe
+      result = ''
+      while ReadFile(@pipe, @ffi_buffer, read_size, bytes, nil)
+        value = @ffi_buffer.get_bytes(0, bytes.read_ulong)
+        result += value
+      end
+      result
+    end
+
     # Writes 'data' to the pipe. You can write data to either end of a
     # named pipe.
     #
