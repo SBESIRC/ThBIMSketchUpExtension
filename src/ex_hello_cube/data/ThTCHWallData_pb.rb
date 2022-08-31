@@ -3,11 +3,11 @@
 
 require 'google/protobuf'
 
-require_relative 'ThTCHGeometry_pb'
-require_relative 'ThTCHDoorData_pb'
-require_relative 'ThTCHWindowData_pb'
-require_relative 'ThTCHOpeningData_pb'
-require_relative 'ThTCHBuiltElementData_pb'
+require 'ThTCHGeometry_pb'
+require 'ThTCHDoorData_pb'
+require 'ThTCHWindowData_pb'
+require 'ThTCHOpeningData_pb'
+require 'ThTCHBuiltElementData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHWallData.proto", :syntax => :proto3) do

@@ -3,14 +3,21 @@
 
 require 'google/protobuf'
 
-require_relative 'ThTCHBuiltElementData_pb'
+require 'ThTCHBuiltElementData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHWindowData.proto", :syntax => :proto3) do
     add_message "ThTCHWindowData" do
       optional :build_element, :message, 1, "ThTCHBuiltElementData"
+      optional :type, :enum, 2, "WindowType"
+    end
+    add_enum "WindowType" do
+      value :Window, 0
+      value :Shutter, 1
+      value :Eccentric, 2
     end
   end
 end
 
 ThTCHWindowData = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHWindowData").msgclass
+WindowType = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("WindowType").enummodule

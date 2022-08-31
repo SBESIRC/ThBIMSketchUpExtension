@@ -1,5 +1,7 @@
 # Copyright 2016-2022 Trimble Inc
 # Licensed under the MIT license
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 require 'sketchup.rb'
 require 'google/protobuf'
 require_relative 'data/ThTCHBuildingData_pb'
@@ -59,7 +61,7 @@ module Examples
       model.start_operation('Create Cube', true)
       group = model.active_entities.add_group
       entities = group.entities
-      pt1_x = 
+      pt1_x =
       points = [
         Geom::Point3d.new(data.origin.x + data.width / 2, data.origin.y + data.length / 2, 0),
         Geom::Point3d.new(data.origin.x - data.width / 2, data.origin.y + data.length / 2, 0),
@@ -96,7 +98,7 @@ module Examples
           }
           command_tool1.tooltip = "Test Pipe Connect"                      # 对该工具的一些说明
           command_tool1.status_bar_text = "测试 管道 连接" # 在状态栏中显示的内容
-          
+
           # Command2
           command_tool2 = UI::Command.new("测试Viewer连接") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
