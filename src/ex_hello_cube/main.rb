@@ -11,18 +11,17 @@ module Examples
   module HelloCube
     @TimerID = 0
     @TimerFlag = false
-    @CommandTool
 
     def self.StartWin32PipeMonitor
       @TimerID = UI.start_timer(2, true){
         begin
           Pipe::Client.new('THSUPush_TestPipe') do |pipe|
-            data = pipe.readCadPipeData
-            model = ThTCHBuildingData.decode(data)
+            pipe_data = pipe.readCadPipeData
+            pipe_data_head = pipe_data[0,10]
+            # value1 = pipe_data_head.getbyte(0)
+            pipe_data_body = pipe_data[10..pipe_data.length]
+            model = ThTCHBuildingData.decode(pipe_data_body)
             ThTCH2SUBuildingBuilder.Building(model)
-
-            # self.CreatEntity(model)
-            # puts "Got [#{data}] back from server"
           end
         rescue => e
           e.message
@@ -34,6 +33,25 @@ module Examples
     def self.CloseWin32PipeMonitor
       UI.stop_timer(@TimerID)
       @TimerFlag = false
+    end
+
+    def self.get_su_build_info
+      definitions = Sketchup.active_model.definitions
+      definitions.each{ |comp_def|
+        comp_instances = comp_def.instances
+        if comp_instances.length > 0
+          faces = comp_def.entities.grep(Sketchup::Face)
+          faces.each{ |face|
+            flags = 7
+            mesh = face.mesh(flags)
+            pts = mesh.points
+            polygons = mesh.polygons
+          }
+          comp_instances.each{ |instance|
+            t = instance.transformation
+          }
+        end
+      }
     end
 
     def self.CreatEntity(data)
@@ -53,46 +71,52 @@ module Examples
       model.commit_operation
     end
 
-    def self.ReadFile1
-      # file = File.open("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin","r")
-      # data2 = file.read
-      # file_data = file.readlines.map(&:chomp)
-
-      # contents = File.open("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin", "r") { |f| f.read }
-      # data = contents
-      # s = IO.read("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin")
-      
-      # data1 = File.read("D:/SketchUp/ThBIMSketchUpExtension/src/ex_hello_cube/data.bin")
-      # model = ThTCHBuildingData.decode(data)
-      # value = ThTCH2SUBuildingBuilder.Building(model)
-    end
-
     def self.Show_ToolBar
       toolbar = UI::Toolbar.new "CAD插件"                   # 创建一个名为Test工具条
       if toolbar.visible? and toolbar.length > 0
         toolbar.hide
       else
         if toolbar.length < 1
-          @CommandTool = UI::Command.new("测试管道连接") {           # 创建一个工具名为Test的命令
+          # Command1
+          command_tool1 = UI::Command.new("测试管道连接") {           # 创建一个工具名为Test的命令
               if(@TimerFlag == false)
                 self.StartWin32PipeMonitor
               else
                 self.CloseWin32PipeMonitor
               end
-              # self.ReadFile1
           }
-          @CommandTool.small_icon = "../Img/ToolPencilSmall.png"             # 工具在工具条上显示的图标
-          @CommandTool.large_icon = "../Img/ToolPencilLarge.png"
-          @CommandTool.set_validation_proc {
+          command_tool1.small_icon = "../Img/ToolPencilSmall.png"             # 工具在工具条上显示的图标
+          command_tool1.large_icon = "../Img/ToolPencilLarge.png"
+          command_tool1.set_validation_proc {
             if @TimerFlag
               MF_CHECKED
             else
               MF_UNCHECKED
             end
           }
-          @CommandTool.tooltip = "Test Pipe Connect"                      # 对该工具的一些说明
-          @CommandTool.status_bar_text = "测试 管道 连接" # 在状态栏中显示的内容
-          toolbar = toolbar.add_item @CommandTool                     # 将这个命名添加到工具条上
+          command_tool1.tooltip = "Test Pipe Connect"                      # 对该工具的一些说明
+          command_tool1.status_bar_text = "测试 管道 连接" # 在状态栏中显示的内容
+          
+          # Command2
+          command_tool2 = UI::Command.new("测试Viewer连接") {           # 创建一个工具名为Test的命令
+            self.get_su_build_info
+          }
+          command_tool2.small_icon = "../Img/ToolPencilLarge.png"             # 工具在工具条上显示的图标
+          command_tool2.large_icon = "../Img/ToolPencilSmall.png"
+          # command_tool2.set_validation_proc {
+          #   if @TimerFlag
+          #     MF_CHECKED
+          #   else
+          #     MF_UNCHECKED
+          #   end
+          # }
+          command_tool2.tooltip = "Test Viewer Connect"                      # 对该工具的一些说明
+          command_tool2.status_bar_text = "测试 Viewer 连接" # 在状态栏中显示的内容
+
+
+          toolbar = toolbar.add_item command_tool1                     # 将这个命名添加到工具条上
+          toolbar = toolbar.add_separator                              # 添加分隔符
+          toolbar = toolbar.add_item command_tool2                     # 将这个命名添加到工具条上
         end
         toolbar.show                                       # 在SktchUp中显示该工具条
       end
