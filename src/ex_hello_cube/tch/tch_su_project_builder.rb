@@ -3,18 +3,22 @@ require_relative 'tch_su_storey_factory.rb'
 
 module Examples
   module HelloCube
-    class ThTCH2SUBuildingBuilder
+    class ThTCH2SUProjectBuilder
         def self.Building(data)
-          if data.is_a?(ThTCHBuildingData)
+          if data.is_a?(ThTCHProjectData)
             model = Sketchup.active_model
-            storeys = data.storeys
+            project_site = data.site
+            project_site_buildings = project_site.buildings
+            # 暂时先假定只有一个building，等后续多建筑后再去扩展
+            building = project_site_buildings.first
+            storeys = building.storeys
             storeys.each{ |storey|
               # 后期在这里做逻辑
               # 创建geometry
               ThTCH2SUStoreyFactory.ParseFloor(model, storey)
             }
           else
-            value = 2
+            value = false
           end
         end
     end

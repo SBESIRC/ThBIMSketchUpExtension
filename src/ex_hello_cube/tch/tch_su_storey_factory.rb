@@ -7,9 +7,9 @@ module Examples
       def self.ParseFloor(model, storey)
         if storey.is_a?(ThTCHBuildingStoreyData)
           list = model.definitions
-          comp_def = list[storey.usage]
+          comp_def = list[storey.root.description]
           if comp_def.nil?
-            comp_def = list.add storey.usage
+            comp_def = list.add storey.root.description
             # comp_def.description = storey.root.name
             entities = comp_def.entities
             storey_doors = storey.doors
@@ -17,9 +17,9 @@ module Examples
             storey_walls = storey.walls
             storey_walls.each{ |wall|
               ThTCH2SUWALLFACTORY.to_su_wall(entities, wall)
-          }
+            }
           end
-
+          
           # a transformation that does nothing to just get the job done.
           trans = Geom::Transformation.new(ThTCH2SUGeomUtil.to_su_point3d(storey.origin)) # an empty, default transformation.
           # Now, insert the Cube component.

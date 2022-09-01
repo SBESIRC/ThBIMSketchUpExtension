@@ -220,6 +220,19 @@ module Win32
       end
     end
 
+    # Writes 'data' to the pipe. You can write data to either end of a
+    # named pipe.
+    #
+    def writeCadPipeData(data)
+      bytes = FFI::MemoryPointer.new(:ulong)
+      raise Error, "no pipe created" unless @pipe
+      unless WriteFile(@pipe, data, data.size, bytes, nil)
+        #raise SystemCallError.new("WriteFile", FFI.errno)
+        return false
+      end
+      return true
+    end
+
     # Returns the pipe object if an event (such as a client connection)
     # occurs within the +max_time+ specified (in seconds). Otherwise, it
     # returns false.

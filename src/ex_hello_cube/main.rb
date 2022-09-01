@@ -4,8 +4,10 @@ $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 require 'sketchup.rb'
 require 'google/protobuf'
-require_relative 'data/ThTCHBuildingData_pb'
-require_relative 'tch/tch_su_building_builder'
+require_relative 'data/ThTCHProjectData_pb'
+require_relative 'data/ThSUProjectData_pb'
+require_relative 'tch/tch_su_project_builder'
+require_relative 'tch/tch_su_geom_utils'
 require_relative '../win32/pipe'
 include Win32
 
@@ -22,8 +24,8 @@ module Examples
             pipe_data_head = pipe_data[0,10]
             # value1 = pipe_data_head.getbyte(0)
             pipe_data_body = pipe_data[10..pipe_data.length]
-            model = ThTCHBuildingData.decode(pipe_data_body)
-            ThTCH2SUBuildingBuilder.Building(model)
+            model = ThTCHProjectData.decode(pipe_data_body)
+            ThTCH2SUProjectBuilder.Building(model)
           end
         rescue => e
           e.message
@@ -37,23 +39,61 @@ module Examples
       @TimerFlag = false
     end
 
+    # 获取SU构建信息并发送至Viewer
     def self.get_su_build_info
+      su_project = ThSUProjectData.new
+      su_project.root = ThTCHRootData.new
+      su_project.root.name = "测试项目"
       definitions = Sketchup.active_model.definitions
       definitions.each{ |comp_def|
+        comp_def_name = comp_def.name
         comp_instances = comp_def.instances
-        if comp_instances.length > 0
+        if comp_def_name != "Laura" and !comp_def.group? and comp_instances.length > 0 and !comp_def_name.include?("ThDefinition")
+          su_component_definition = ThSUCompDefinitionData.new
+          su_component_definition.definition_name = comp_def_name
           faces = comp_def.entities.grep(Sketchup::Face)
           faces.each{ |face|
-            flags = 7
-            mesh = face.mesh(flags)
-            pts = mesh.points
-            polygons = mesh.polygons
+            begin
+              # flags = 7
+              su_face_data = ThSUFaceData.new
+              mesh = face.mesh
+              su_mesh = ThSUPolygonMesh.new
+              pts = mesh.points
+              pts.each{ |pt|
+                su_mesh.points.push ThTCH2SUGeomUtil.to_proto_point3d(pt)
+              }
+              polygons = mesh.polygons
+              polygons.each{ |polygon|
+                su_mesh.polygons.push ThTCH2SUGeomUtil.to_proto_polygon(polygon)
+              }
+              su_face_data.mesh = su_mesh
+              su_component_definition.faces.push su_face_data
+            rescue => e
+              e.message
+            end
           }
           comp_instances.each{ |instance|
-            t = instance.transformation
+            su_component_data = ThSUBuildingElementData.new
+            su_component_instance = ThSUComponentData.new
+            su_component_instance.definition = su_component_definition
+            su_component_instance.transformations = ThTCH2SUGeomUtil.to_proto_transformation(instance.transformation)
+            su_component_data.component = su_component_instance
+            su_component_data.root = ThTCHRootData.new
+            su_component_data.root.globalId = instance.entityID.to_s
+            su_component_data.root.name = instance.name.to_s
+
+            su_project.buildings.push su_component_data
           }
         end
       }
+      begin
+        Pipe::Client.new('THSU2Viewer_TestPipe') do |pipe|
+          encoded_data = ThSUProjectData.encode(su_project)
+          result = pipe.writeCadPipeData(encoded_data)
+        end
+      rescue => e
+        e.message
+      end
     end
 
     def self.CreatEntity(data)
