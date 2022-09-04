@@ -13,6 +13,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThSUPolygonMesh" do
       repeated :points, :message, 1, "ThTCHPoint3d"
       repeated :polygons, :message, 2, "ThSUPolygon"
+      repeated :normals, :message, 3, "ThTCHVector3d"
     end
   end
 end

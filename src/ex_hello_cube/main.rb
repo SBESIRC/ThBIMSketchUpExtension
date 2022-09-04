@@ -54,18 +54,22 @@ module Examples
           faces = comp_def.entities.grep(Sketchup::Face)
           faces.each{ |face|
             begin
-              # flags = 7
+              # 0: Include PolygonMeshPoints,
+              # 1: Include PolygonMeshUVQFront,
+              # 2: Include PolygonMeshUVQBack,
+              # 4: Include PolygonMeshNormals.
               su_face_data = ThSUFaceData.new
-              mesh = face.mesh
+              mesh = face.mesh(4)
               su_mesh = ThSUPolygonMesh.new
               pts = mesh.points
               pts.each{ |pt|
                 su_mesh.points.push ThTCH2SUGeomUtil.to_proto_point3d(pt)
               }
-              polygons = mesh.polygons
-              polygons.each{ |polygon|
-                su_mesh.polygons.push ThTCH2SUGeomUtil.to_proto_polygon(polygon)
-              }
+              nump = mesh.count_polygons
+              (1..nump).each do |i|
+                su_mesh.polygons.push ThTCH2SUGeomUtil.to_proto_polygon(mesh.polygon_at(i))
+                su_mesh.normals.push ThTCH2SUGeomUtil.to_proto_vector3d(mesh.normal_at(i))
+              end
               su_face_data.mesh = su_mesh
               su_component_definition.faces.push su_face_data
             rescue => e
@@ -94,23 +98,6 @@ module Examples
       rescue => e
         e.message
       end
-    end
-
-    def self.CreatEntity(data)
-      model = Sketchup.active_model
-      model.start_operation('Create Cube', true)
-      group = model.active_entities.add_group
-      entities = group.entities
-      pt1_x =
-      points = [
-        Geom::Point3d.new(data.origin.x + data.width / 2, data.origin.y + data.length / 2, 0),
-        Geom::Point3d.new(data.origin.x - data.width / 2, data.origin.y + data.length / 2, 0),
-        Geom::Point3d.new(data.origin.x - data.width / 2, data.origin.y - data.length / 2, 0),
-        Geom::Point3d.new(data.origin.x + data.width / 2, data.origin.y - data.length / 2, 0),
-      ]
-      face = entities.add_face(points)
-      face.pushpull(-1 * data.height)
-      model.commit_operation
     end
 
     def self.Show_ToolBar
@@ -145,13 +132,6 @@ module Examples
           }
           command_tool2.small_icon = "../Img/ToolPencilLarge.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "../Img/ToolPencilSmall.png"
-          # command_tool2.set_validation_proc {
-          #   if @TimerFlag
-          #     MF_CHECKED
-          #   else
-          #     MF_UNCHECKED
-          #   end
-          # }
           command_tool2.tooltip = "Test Viewer Connect"                      # 对该工具的一些说明
           command_tool2.status_bar_text = "测试 Viewer 连接" # 在状态栏中显示的内容
 

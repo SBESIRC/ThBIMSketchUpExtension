@@ -29,6 +29,14 @@ module Examples
       Geom::Vector3d.new(v.x, v.y, v.z)
     end
 
+    def to_proto_vector3d(v)
+      proto_v = ThTCHVector3d.new
+      proto_v.x = v.x
+      proto_v.y = v.y
+      proto_v.z = v.z
+      proto_v
+    end
+
     def to_su_transformation(m)
       arr = [
         m.data11, m.data12, m.data13, m.data14,
