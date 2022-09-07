@@ -8,6 +8,8 @@ require 'ThTCHWallData_pb'
 require 'ThTCHDoorData_pb'
 require 'ThTCHGeometry_pb'
 require 'ThTCHWindowData_pb'
+require 'ThTCHSlabData_pb'
+require 'ThTCHRailingData_pb'
 require 'ThTCHOpeningData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
@@ -22,6 +24,8 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :walls, :message, 7, "ThTCHWallData"
       repeated :doors, :message, 8, "ThTCHDoorData"
       repeated :windows, :message, 9, "ThTCHWindowData"
+      repeated :slabs, :message, 10, "ThTCHSlabData"
+      repeated :railings, :message, 11, "ThTCHRailingData"
     end
   end
 end

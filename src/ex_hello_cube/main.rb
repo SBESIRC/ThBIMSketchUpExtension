@@ -44,6 +44,7 @@ module Examples
       su_project = ThSUProjectData.new
       su_project.root = ThTCHRootData.new
       su_project.root.name = "测试项目"
+      su_project.root.globalId = "su_test_pipe_data"
       definitions = Sketchup.active_model.definitions
       definitions.each{ |comp_def|
         comp_def_name = comp_def.name
@@ -107,15 +108,15 @@ module Examples
       else
         if toolbar.length < 1
           # Command1
-          command_tool1 = UI::Command.new("测试管道连接") {           # 创建一个工具名为Test的命令
+          command_tool1 = UI::Command.new("开启CAD监听") {           # 创建一个工具名为Test的命令
               if(@TimerFlag == false)
                 self.StartWin32PipeMonitor
               else
                 self.CloseWin32PipeMonitor
               end
           }
-          command_tool1.small_icon = "../Img/ToolPencilSmall.png"             # 工具在工具条上显示的图标
-          command_tool1.large_icon = "../Img/ToolPencilLarge.png"
+          command_tool1.small_icon = "../Img/ToCAD.png"             # 工具在工具条上显示的图标
+          command_tool1.large_icon = "../Img/ToCAD.png"
           command_tool1.set_validation_proc {
             if @TimerFlag
               MF_CHECKED
@@ -123,17 +124,17 @@ module Examples
               MF_UNCHECKED
             end
           }
-          command_tool1.tooltip = "Test Pipe Connect"                      # 对该工具的一些说明
-          command_tool1.status_bar_text = "测试 管道 连接" # 在状态栏中显示的内容
+          command_tool1.tooltip = "Turn on CAD monitoring"                      # 对该工具的一些说明
+          command_tool1.status_bar_text = "开启 CAD 监听" # 在状态栏中显示的内容
 
           # Command2
-          command_tool2 = UI::Command.new("测试Viewer连接") {           # 创建一个工具名为Test的命令
+          command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
           }
-          command_tool2.small_icon = "../Img/ToolPencilLarge.png"             # 工具在工具条上显示的图标
-          command_tool2.large_icon = "../Img/ToolPencilSmall.png"
-          command_tool2.tooltip = "Test Viewer Connect"                      # 对该工具的一些说明
-          command_tool2.status_bar_text = "测试 Viewer 连接" # 在状态栏中显示的内容
+          command_tool2.small_icon = "../Img/ToViewer.png"             # 工具在工具条上显示的图标
+          command_tool2.large_icon = "../Img/ToViewer.png"
+          command_tool2.tooltip = "Push To Viewer"                      # 对该工具的一些说明
+          command_tool2.status_bar_text = "推送至 Viewer" # 在状态栏中显示的内容
 
 
           toolbar = toolbar.add_item command_tool1                     # 将这个命名添加到工具条上
