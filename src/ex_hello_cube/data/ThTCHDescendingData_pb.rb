@@ -13,6 +13,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :descending_height, :double, 3
       optional :descending_thickness, :double, 4
       optional :descending_wrap_thickness, :double, 5
+      optional :outline_buffer, :message, 6, "ThTCHPolyline"
     end
   end
 end

@@ -7,7 +7,7 @@ require 'google/protobuf'
 require_relative 'data/ThTCHProjectData_pb'
 require_relative 'data/ThSUProjectData_pb'
 require_relative 'tch/tch_su_project_builder'
-require_relative 'tch/tch_su_geom_utils'
+require_relative 'tch/protobuf_extension'
 require_relative 'win32/pipe'
 include Win32
 
@@ -45,52 +45,36 @@ module Examples
       su_project.root = ThTCHRootData.new
       su_project.root.name = "测试项目"
       su_project.root.globalId = "su_test_pipe_data"
-      definitions = Sketchup.active_model.definitions
-      definitions.each{ |comp_def|
-        comp_def_name = comp_def.name
-        comp_instances = comp_def.instances
-        if comp_def_name != "Laura" and !comp_def.group? and comp_instances.length > 0 and !comp_def_name.include?("ThDefinition")
-          su_component_definition = ThSUCompDefinitionData.new
-          su_component_definition.definition_name = comp_def_name
-          faces = comp_def.entities.grep(Sketchup::Face)
-          faces.each{ |face|
-            begin
-              # 0: Include PolygonMeshPoints,
-              # 1: Include PolygonMeshUVQFront,
-              # 2: Include PolygonMeshUVQBack,
-              # 4: Include PolygonMeshNormals.
-              su_face_data = ThSUFaceData.new
-              mesh = face.mesh(4)
-              su_mesh = ThSUPolygonMesh.new
-              pts = mesh.points
-              pts.each{ |pt|
-                su_mesh.points.push ThTCH2SUGeomUtil.to_proto_point3d(pt)
-              }
-              nump = mesh.count_polygons
-              (1..nump).each do |i|
-                su_mesh.polygons.push ThTCH2SUGeomUtil.to_proto_polygon(mesh.polygon_at(i))
-                su_mesh.normals.push ThTCH2SUGeomUtil.to_proto_vector3d(mesh.normal_at(i))
-              end
-              su_face_data.mesh = su_mesh
-              su_component_definition.faces.push su_face_data
-            rescue => e
-              e.message
+      entities = Sketchup.active_model.entities
+      definition_dic = Hash.new
+      begin
+        entities.each{ |ent|
+          if ent.is_a?(Sketchup::Group)
+            definition = ent.definition
+            name = definition.name
+            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+              su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
+              su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+              su_project.buildings.push su_component_data
             end
-          }
-          comp_instances.each{ |instance|
-            su_component_data = ThSUBuildingElementData.new
-            su_component_instance = ThSUComponentData.new
-            su_component_instance.definition = su_component_definition
-            su_component_instance.transformations = ThTCH2SUGeomUtil.to_proto_transformation(instance.transformation)
-            su_component_data.component = su_component_instance
-            su_component_data.root = ThTCHRootData.new
-            su_component_data.root.globalId = instance.entityID.to_s
-            su_component_data.root.name = instance.name.to_s
+          elsif ent.is_a?(Sketchup::ComponentInstance)
+            definition = ent.definition
+            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+              if definition_dic[definition].nil?
+                su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
+                definition_dic[definition] = su_component_definition
+              elsif
+                su_component_definition = definition_dic[definition]
+              end
+              su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+              su_project.buildings.push su_component_data
+            end
+          end
+        }
+      rescue => e
+        e.message
+      end
 
-            su_project.buildings.push su_component_data
-          }
-        end
-      }
       begin
         Pipe::Client.new('THSU2Viewer_TestPipe') do |pipe|
           encoded_data = ThSUProjectData.encode(su_project)
@@ -130,6 +114,7 @@ module Examples
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
+            # self.test
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"
@@ -153,6 +138,5 @@ module Examples
       }
       file_loaded(__FILE__)
     end
-
   end # module HelloCube
 end # module Examples

@@ -7,6 +7,13 @@ module Examples
         def self.Building(data)
           if data.is_a?(ThTCHProjectData)
             model = Sketchup.active_model
+            materials = Sketchup.active_model.materials
+            material_dic = Hash.new
+            material_dic["door"] = materials.load(File.expand_path('../../Material/door.skm', __FILE__))
+            material_dic["slab"] = materials.load(File.expand_path('../../Material/slab.skm', __FILE__))
+            material_dic["wall"] = materials.load(File.expand_path('../../Material/wall.skm', __FILE__))
+            material_dic["window"] = materials.load(File.expand_path('../../Material/window.skm', __FILE__))
+            material_dic["railing"] = materials.load(File.expand_path('../../Material/railing.skm', __FILE__))
             project_site = data.site
             project_site_buildings = project_site.buildings
             # 暂时先假定只有一个building，等后续多建筑后再去扩展
@@ -15,7 +22,7 @@ module Examples
             storeys.each{ |storey|
               # 后期在这里做逻辑
               # 创建geometry
-              ThTCH2SUStoreyFactory.ParseFloor(model, storey)
+              ThTCH2SUStoreyFactory.ParseFloor(model, storey, material_dic)
             }
           else
             value = false

@@ -6,35 +6,11 @@ module Examples
     module_function
 
     def to_su_point3d(pt)
-      Geom::Point3d.new(pt.x, pt.y, pt.z)
-    end
-
-    def to_proto_point3d(pt)
-      proto_pt = ThTCHPoint3d.new
-      proto_pt.x = pt.x.to_f
-      proto_pt.y = pt.y.to_f
-      proto_pt.z = pt.z.to_f
-      proto_pt
-    end
-
-    def to_proto_polygon(polygon)
-      proto_polygon = ThSUPolygon.new
-      proto_polygon.indices.push polygon[0]
-      proto_polygon.indices.push polygon[1]
-      proto_polygon.indices.push polygon[2]
-      proto_polygon
+      Geom::Point3d.new(pt.x.mm, pt.y.mm, pt.z.mm)
     end
 
     def to_su_vector3d(v)
       Geom::Vector3d.new(v.x, v.y, v.z)
-    end
-
-    def to_proto_vector3d(v)
-      proto_v = ThTCHVector3d.new
-      proto_v.x = v.x
-      proto_v.y = v.y
-      proto_v.z = v.z
-      proto_v
     end
 
     def to_su_transformation(m)
@@ -46,33 +22,7 @@ module Examples
       ]
       Geom::Transformation.new(arr)
     end
-
-    def to_proto_transformation(m)
-      arr = m.to_a
-      proto_matrix = ThTCHMatrix3d.new
-      proto_matrix.data11 = arr[0].to_f
-      proto_matrix.data12 = arr[1].to_f
-      proto_matrix.data13 = arr[2].to_f
-      proto_matrix.data14 = arr[3].to_f
-
-      proto_matrix.data21 = arr[4].to_f
-      proto_matrix.data22 = arr[5].to_f
-      proto_matrix.data23 = arr[6].to_f
-      proto_matrix.data24 = arr[7].to_f
-
-      proto_matrix.data31 = arr[8].to_f
-      proto_matrix.data32 = arr[9].to_f
-      proto_matrix.data33 = arr[10].to_f
-      proto_matrix.data34 = arr[11].to_f
-
-      proto_matrix.data41 = arr[12].to_f
-      proto_matrix.data42 = arr[13].to_f
-      proto_matrix.data43 = arr[14].to_f
-      proto_matrix.data44 = arr[15].to_f
-
-      proto_matrix
-    end
-
+    
     # def multiple_transformations(scale, rotation, vector)
     #   # https://forums.sketchup.com/t/tranformation-move-and-rotate/154112
     #   var z_axis = Geom::Vector3d.new(0, 0, 1)
