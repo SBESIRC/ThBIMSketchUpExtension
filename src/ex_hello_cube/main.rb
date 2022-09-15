@@ -76,9 +76,15 @@ module Examples
       end
 
       begin
+        encoded_data_body = ThSUProjectData.encode(su_project)
+        # # 为文件增加头部标识
+        # encoded_data_head = [84, 72, 2, 0, 0, 0, 0, 0, 0, 0]
+        # encoded_data = encoded_data_head.pack('C*') + encoded_data_body
+        # outfile = File.new('D:\\SketchUpProject.ThBim', 'wb')
+        # outfile.write(encoded_data)
+        # outfile.close
         Pipe::Client.new('THSU2Viewer_TestPipe') do |pipe|
-          encoded_data = ThSUProjectData.encode(su_project)
-          result = pipe.writeCadPipeData(encoded_data)
+          result = pipe.writeCadPipeData(encoded_data_body)
         end
       rescue => e
         e.message
