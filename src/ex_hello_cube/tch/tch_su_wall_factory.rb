@@ -94,10 +94,10 @@ module Examples
       y_vector = x_vector.cross(Geom::Vector3d.new(0, 0, 1))
       origin = ThTCH2SUGeomUtil.to_su_point3d(build_element.origin)
       pts = []
-      pts[0] = origin.offset(x_vector, (build_element.length / 2).mm).offset(y_vector, (wall_width / 2).mm)
-      pts[1] = origin.offset(x_vector, (build_element.length / 2).mm).offset(y_vector, (-1 * wall_width / 2).mm)
-      pts[2] = origin.offset(x_vector, (-1 * build_element.length / 2).mm).offset(y_vector, (-1 * wall_width / 2).mm)
-      pts[3] = origin.offset(x_vector, (-1 * build_element.length / 2).mm).offset(y_vector, (wall_width / 2).mm)
+      pts[0] = origin.offset(x_vector, (build_element.length / 2).mm).offset(y_vector, (wall_width + 5 / 2).mm)
+      pts[1] = origin.offset(x_vector, (build_element.length / 2).mm).offset(y_vector, (-1 * wall_width + 5 / 2).mm)
+      pts[2] = origin.offset(x_vector, (-1 * build_element.length / 2).mm).offset(y_vector, (-1 * wall_width + 5 / 2).mm)
+      pts[3] = origin.offset(x_vector, (-1 * build_element.length / 2).mm).offset(y_vector, (wall_width + 5 / 2).mm)
       hole_face = group.entities.add_face(pts)
     end
 

@@ -120,7 +120,6 @@ module Examples
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
-            # self.test
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"
