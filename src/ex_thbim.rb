@@ -8,10 +8,10 @@ module Examples # TODO: Change module name to fit the project.
   module HelloCube
 
     unless file_loaded?(__FILE__)
-      ex = SketchupExtension.new('Hello Cube', 'ex_hello_cube/main')
-      ex.description = 'SketchUp Ruby API example creating a cube.'
+      ex = SketchupExtension.new('THAI Bim Extension', 'ex_thbim/main')
+      ex.description = 'THAI Bim Extension for SketchUp.'
       ex.version     = '1.0.0'
-      ex.copyright   = 'Trimble Inc © 2016-2022'
+      ex.copyright   = 'THAI © 2022-~'
       ex.creator     = 'SketchUp'
       Sketchup.register_extension(ex, true)
       file_loaded(__FILE__)

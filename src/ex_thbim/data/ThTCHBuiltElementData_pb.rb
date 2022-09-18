@@ -5,6 +5,7 @@ require 'google/protobuf'
 
 require 'ThTCHRootData_pb'
 require 'ThTCHGeometry_pb'
+require 'ThTCHProperty_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHBuiltElementData.proto", :syntax => :proto3) do
@@ -15,7 +16,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :height, :double, 4
       optional :origin, :message, 5, "ThTCHPoint3d"
       optional :x_vector, :message, 6, "ThTCHVector3d"
-      proto3_optional :outline, :message, 7, "ThTCHPolyline"
+      optional :outline, :message, 7, "ThTCHPolyline"
+      proto3_optional :enum_material, :string, 8
+      repeated :Properties, :message, 9, "ThTCHProperty"
     end
   end
 end

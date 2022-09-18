@@ -10,7 +10,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUFaceData.proto", :syntax => :proto3) do
     add_message "ThSUFaceData" do
       optional :mesh, :message, 1, "ThSUPolygonMesh"
-      proto3_optional :material, :message, 2, "ThSUMaterialData"
+      optional :material, :message, 2, "ThSUMaterialData"
     end
   end
 end

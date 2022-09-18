@@ -3,7 +3,7 @@
 
 require 'google/protobuf'
 
-require 'ThTCHRootData_pb'
+require 'ThTCHBuiltElementData_pb'
 require 'ThTCHWallData_pb'
 require 'ThTCHDoorData_pb'
 require 'ThTCHGeometry_pb'
@@ -15,17 +15,19 @@ require 'ThTCHOpeningData_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHBuildingStoreyData.proto", :syntax => :proto3) do
     add_message "ThTCHBuildingStoreyData" do
-      optional :root, :message, 1, "ThTCHRootData"
+      optional :build_element, :message, 1, "ThTCHBuiltElementData"
       optional :number, :string, 2
       optional :height, :double, 3
       optional :elevation, :double, 4
       optional :usage, :string, 5
       optional :origin, :message, 6, "ThTCHPoint3d"
-      repeated :walls, :message, 7, "ThTCHWallData"
-      repeated :doors, :message, 8, "ThTCHDoorData"
-      repeated :windows, :message, 9, "ThTCHWindowData"
-      repeated :slabs, :message, 10, "ThTCHSlabData"
-      repeated :railings, :message, 11, "ThTCHRailingData"
+      optional :memory_storey_id, :string, 7
+      optional :memory_matrix3d, :message, 8, "ThTCHMatrix3d"
+      repeated :walls, :message, 9, "ThTCHWallData"
+      repeated :doors, :message, 10, "ThTCHDoorData"
+      repeated :windows, :message, 11, "ThTCHWindowData"
+      repeated :slabs, :message, 12, "ThTCHSlabData"
+      repeated :railings, :message, 13, "ThTCHRailingData"
     end
   end
 end

@@ -39,6 +39,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThTCHPolyline" do
       repeated :points, :message, 1, "ThTCHPoint3d"
       repeated :segments, :message, 2, "ThTCHSegment"
+      repeated :inner_polylines, :message, 3, "ThTCHPolyline"
     end
   end
 end

@@ -5,6 +5,7 @@ module Examples
   module ThTCH2SURAILINGFACTORY
     module_function
     def to_su_railing(entities, railing, material)
+      begin
         railing_build_element = railing.build_element
         railing_group = entities.add_group
         railing_face = create_railing_face(railing_group, railing_build_element)
@@ -13,6 +14,9 @@ module Examples
         railing_group.definition.add_classification("IFC 2x3", "IfcRailing")
         railing_group.material = material
         railing_group.locked = true
+      rescue => e
+        e.message
+      end
     end
 
     def create_railing_face(group, build_element)

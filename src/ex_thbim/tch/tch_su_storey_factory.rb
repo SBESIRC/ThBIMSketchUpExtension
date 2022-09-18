@@ -9,14 +9,15 @@ module Examples
       def self.ParseFloor(model, storey, material_dic)
         if storey.is_a?(ThTCHBuildingStoreyData)
           list = model.definitions
-          comp_def = list[storey.root.description]
+          story_description = storey.build_element.root.description
+          comp_def = list[story_description]
           if comp_def.nil?
-              comp_def = list.add storey.root.description
+              comp_def = list.add story_description
               # comp_def.description = storey.root.name
               entities = comp_def.entities
               storey_doors = storey.doors
               storey_windows = storey.windows
-
+              begin
               # Wall
               storey_walls = storey.walls
               storey_walls.each{ |wall|
@@ -33,13 +34,16 @@ module Examples
               storey_railings.each{ |railing|
                 ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing, material_dic["railing"])
               }
+            rescue => e
+              e.message
+            end
           end
           
           # a transformation that does nothing to just get the job done.
           trans = Geom::Transformation.new(ThTCH2SUGeomUtil.to_su_point3d(storey.origin)) # an empty, default transformation.
           # Now, insert the Cube component.
           instance = model.active_entities.add_instance(comp_def, trans)
-          instance.name = storey.root.name
+          instance.name = storey.build_element.root.name
           instance.locked = true
         else
           result = false
