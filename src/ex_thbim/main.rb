@@ -19,7 +19,7 @@ module Examples
     def self.StartWin32PipeMonitor
       @TimerID = UI.start_timer(2, true){
         begin
-          Pipe::Client.new('THSUPush_TestPipe') do |pipe|
+          Pipe::Client.new('THCAD2SUPIPE') do |pipe|
             pipe_data = pipe.readCadPipeData
             pipe_data_head = pipe_data[0,10]
             # value1 = pipe_data_head.getbyte(0)
@@ -83,7 +83,7 @@ module Examples
         # outfile = File.new('D:\\SketchUpProject.ThBim', 'wb')
         # outfile.write(encoded_data)
         # outfile.close
-        Pipe::Client.new('THSU2Viewer_TestPipe') do |pipe|
+        Pipe::Client.new('THSU2P3DPIPE') do |pipe|
           result = pipe.writeCadPipeData(encoded_data_body)
         end
       rescue => e
