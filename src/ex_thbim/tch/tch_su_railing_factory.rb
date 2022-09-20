@@ -13,6 +13,8 @@ module Examples
         railing_face.pushpull(railing_build_element.height.mm)
         railing_group.definition.add_classification("IFC 2x3", "IfcRailing")
         railing_group.material = material
+        railing_group.name = "栏杆"
+        railing_group.description = railing_build_element.root.globalId
         railing_group.locked = true
       rescue => e
         e.message

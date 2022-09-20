@@ -24,16 +24,16 @@ module Examples
               union_group = slab_group.union(descending_buffer_group)
               if !union_group.nil?
                 slab_group = union_group
-                descending_group = entities.add_group
-                descending_face = create_descending_face(descending_group, descending)
-                descending_face.reverse! if descending_face.normal.z > 0 ; # flip face to up if facing down
-                descending_face.pushpull((descending.descending_height + 2).mm)
-                subtract_group = descending_group.subtract(slab_group)
-                if !subtract_group.nil?
-                  slab_group = subtract_group
-                end
               end
-              
+              descending_group = entities.add_group
+              descending_face = create_descending_face(descending_group, descending)
+              descending_face.reverse! if descending_face.normal.z > 0 ; # flip face to up if facing down
+              descending_face.pushpull((descending.descending_height + 2).mm)
+              subtract_group = descending_group.subtract(slab_group)
+              if !subtract_group.nil?
+                # entities.erase_entities slab_group
+                slab_group = subtract_group
+              end
           else
               # 洞
               slab_hole_group = entities.add_group
@@ -45,10 +45,12 @@ module Examples
       }
       slab_group.definition.add_classification("IFC 2x3", "IfcSlab")
       slab_group.material = material
+      slab_group.name = "板"
+      slab_group.description = slab_build_element.root.globalId
       slab_group.locked = true
       rescue => exception
         msg = exception.message
-        end
+      end
     end
 
     def create_slab_face(group, build_element)

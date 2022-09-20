@@ -31,6 +31,8 @@ module Examples
         door_face.pushpull(door_build_element.height.mm)
         door_group.definition.add_classification("IFC 2x3", "IfcDoor")
         door_group.material = door_material
+        door_group.name = "门"
+        door_group.description = door_build_element.root.globalId
         door_group.locked = true
       }
 
@@ -51,12 +53,15 @@ module Examples
         # If the blue face is pointing up, reverse it.
         window_face.reverse! if window_face.normal.z < 0 ; # flip face to up if facing down
         window_face.pushpull(window_build_element.height.mm)
+        window_group.name = "窗"
+        window_group.description = window_build_element.root.globalId
         window_group.definition.add_classification("IFC 2x3", "IfcWindow")
         window_group.material = window_material
         window_group.locked = true
       }
       wall_group.definition.add_classification("IFC 2x3", "IfcWall")
       wall_group.name = "墙"
+      wall_group.description = wall_build_element.root.globalId
       wall_group.material = wall_material
       wall_group.locked = true
       transform_wall(wall_group, wall_build_element)
