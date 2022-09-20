@@ -6,6 +6,7 @@ module Examples
     module_function
 
     def to_su_slab(entities, slab, material)
+      begin
       slab_build_element = slab.build_element
       slab_group = entities.add_group
       slab_face = create_slab_face(slab_group, slab_build_element)
@@ -20,13 +21,19 @@ module Examples
               descending_buffer_face = create_descending_buffer_face(descending_buffer_group, descending)
               descending_buffer_face.reverse! if descending_buffer_face.normal.z > 0 ; # flip face to up if facing down
               descending_buffer_face.pushpull((descending.descending_height + descending.descending_thickness).mm)
-              slab_group = slab_group.union(descending_buffer_group)
-
-              descending_group = entities.add_group
-              descending_face = create_descending_face(descending_group, descending)
-              descending_face.reverse! if descending_face.normal.z > 0 ; # flip face to up if facing down
-              descending_face.pushpull(descending.descending_height.mm)
-              slab_group = descending_group.subtract(slab_group)
+              union_group = slab_group.union(descending_buffer_group)
+              if !union_group.nil?
+                slab_group = union_group
+                descending_group = entities.add_group
+                descending_face = create_descending_face(descending_group, descending)
+                descending_face.reverse! if descending_face.normal.z > 0 ; # flip face to up if facing down
+                descending_face.pushpull((descending.descending_height + 2).mm)
+                subtract_group = descending_group.subtract(slab_group)
+                if !subtract_group.nil?
+                  slab_group = subtract_group
+                end
+              end
+              
           else
               # 洞
               slab_hole_group = entities.add_group
@@ -39,6 +46,9 @@ module Examples
       slab_group.definition.add_classification("IFC 2x3", "IfcSlab")
       slab_group.material = material
       slab_group.locked = true
+      rescue => exception
+        msg = exception.message
+        end
     end
 
     def create_slab_face(group, build_element)
@@ -60,8 +70,9 @@ module Examples
 
     def create_descending_face(group, descending)
         pts = []
+        tr = Geom::Transformation.new(Geom::Point3d.new(0, 0, 1.mm))
         descending.outline.points.each{ |pt|
-          pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
+          pts.push tr * ThTCH2SUGeomUtil.to_su_point3d(pt)
         }
         face = group.entities.add_face(pts)
     end
