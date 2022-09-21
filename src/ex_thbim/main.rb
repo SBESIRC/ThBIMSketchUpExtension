@@ -22,10 +22,11 @@ module Examples
           Pipe::Client.new('THCAD2SUPIPE') do |pipe|
             pipe_data = pipe.readCadPipeData
             pipe_data_head = pipe_data[0,10]
-            # value1 = pipe_data_head.getbyte(0)
-            pipe_data_body = pipe_data[10..pipe_data.length]
-            model = ThTCHProjectData.decode(pipe_data_body)
-            ThTCH2SUProjectBuilder.Building(model)
+            if pipe_data_head.getbyte(0) == 84 and pipe_data_head.getbyte(1) == 72 and pipe_data_head.getbyte(2) == 1 and pipe_data_head.getbyte(3) == 1
+              pipe_data_body = pipe_data[10..pipe_data.length]
+              model = ThTCHProjectData.decode(pipe_data_body)
+              ThTCH2SUProjectBuilder.Building(model)
+            end
           end
         rescue => e
           e.message
@@ -77,14 +78,22 @@ module Examples
 
       begin
         encoded_data_body = ThSUProjectData.encode(su_project)
-        # # 为文件增加头部标识
-        # encoded_data_head = [84, 72, 2, 0, 0, 0, 0, 0, 0, 0]
-        # encoded_data = encoded_data_head.pack('C*') + encoded_data_body
-        # outfile = File.new('D:\\SketchUpProject.ThBim', 'wb')
-        # outfile.write(encoded_data)
-        # outfile.close
+        # 为文件增加头部标识
         Pipe::Client.new('THSU2P3DPIPE') do |pipe|
-          result = pipe.writeCadPipeData(encoded_data_body)
+          encoded_data_head = [84, 72, 1, 2, 0, 0, 0, 0, 0, 0]
+          encoded_data = encoded_data_head.pack('C*') + encoded_data_body
+          pipe.writeCadPipeData(encoded_data)
+        end
+        file = Sketchup.active_model.path
+        if file.length > 0
+          file_path = File.dirname(file)
+          file_basename = File.basename(file, ".*")
+          filename = File.join(file_path, file_basename + ".thbim")
+          encoded_data_head = [84, 72, 3, 2, 0, 0, 0, 0, 0, 0]
+          encoded_data = encoded_data_head.pack('C*') + encoded_data_body
+          outfile = File.new(filename, 'wb')
+          outfile.write(encoded_data)
+          outfile.close
         end
       rescue => e
         e.message
