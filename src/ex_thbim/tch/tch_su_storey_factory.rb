@@ -140,7 +140,7 @@ module Examples
       end
 
       def self.incremental_update_floor(model, globalid, storey, cache_storey, material_dic)
-        if storey.is_a?(ThTCHBuildingStoreyData)
+        if storey.is_a?(ThTCHBuildingStoreyData) and storey.memory_storey_id.length == 0
           list = model.definitions
           story_description = globalid + storey.build_element.root.description
           comp_def = list[story_description]
@@ -203,6 +203,12 @@ module Examples
               }
               cache_storey_walls.each{ |wall|
                 self.delete_group(entities, wall.build_element.root.globalId)
+                wall.doors.each{ |door|
+                  self.delete_group(entities, door.build_element.root.globalId)
+                }
+                wall.windows.each{ |window|
+                  self.delete_group(entities, window.build_element.root.globalId)
+                }
               }
             end
 
