@@ -36,10 +36,22 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThTCHSegment" do
       repeated :index, :uint32, 1
     end
+    add_message "ThTCHCircle" do
+      optional :center, :message, 1, "ThTCHPoint3d"
+      optional :radius, :double, 2
+    end
+    add_message "ThTCHLine" do
+      optional :start_pt, :message, 1, "ThTCHPoint3d"
+      optional :end_pt, :message, 2, "ThTCHPoint3d"
+    end
     add_message "ThTCHPolyline" do
-      repeated :points, :message, 1, "ThTCHPoint3d"
-      repeated :segments, :message, 2, "ThTCHSegment"
-      repeated :inner_polylines, :message, 3, "ThTCHPolyline"
+      optional :is_closed, :bool, 1
+      repeated :points, :message, 2, "ThTCHPoint3d"
+      repeated :segments, :message, 3, "ThTCHSegment"
+    end
+    add_message "ThTCHMPolygon" do
+      optional :shell, :message, 1, "ThTCHPolyline"
+      repeated :holes, :message, 2, "ThTCHPolyline"
     end
   end
 end
@@ -48,4 +60,7 @@ ThTCHPoint3d = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHPo
 ThTCHVector3d = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHVector3d").msgclass
 ThTCHMatrix3d = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHMatrix3d").msgclass
 ThTCHSegment = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHSegment").msgclass
+ThTCHCircle = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHCircle").msgclass
+ThTCHLine = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHLine").msgclass
 ThTCHPolyline = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHPolyline").msgclass
+ThTCHMPolygon = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHMPolygon").msgclass

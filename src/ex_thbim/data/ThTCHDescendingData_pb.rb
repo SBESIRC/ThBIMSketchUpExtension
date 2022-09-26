@@ -8,12 +8,12 @@ require 'ThTCHGeometry_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHDescendingData.proto", :syntax => :proto3) do
     add_message "ThTCHDescendingData" do
-      optional :outline, :message, 1, "ThTCHPolyline"
+      optional :outline, :message, 1, "ThTCHMPolygon"
       optional :is_descending, :bool, 2
       optional :descending_height, :double, 3
       optional :descending_thickness, :double, 4
       optional :descending_wrap_thickness, :double, 5
-      optional :outline_buffer, :message, 6, "ThTCHPolyline"
+      optional :outline_buffer, :message, 6, "ThTCHMPolygon"
     end
   end
 end

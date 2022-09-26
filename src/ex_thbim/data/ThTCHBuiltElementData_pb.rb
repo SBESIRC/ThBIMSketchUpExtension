@@ -16,7 +16,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :height, :double, 4
       optional :origin, :message, 5, "ThTCHPoint3d"
       optional :x_vector, :message, 6, "ThTCHVector3d"
-      optional :outline, :message, 7, "ThTCHPolyline"
+      optional :outline, :message, 7, "ThTCHMPolygon"
       proto3_optional :enum_material, :string, 8
       repeated :Properties, :message, 9, "ThTCHProperty"
     end

@@ -71,6 +71,7 @@ module Examples
             su_component_definition = ThSUCompDefinitionData.new
             su_component_definition.definition_name = comp_def.name
             faces = comp_def.entities.grep(Sketchup::Face)
+            f_length = faces.length
             faces.each{ |face|
                 # 0: Include PolygonMeshPoints,
                 # 1: Include PolygonMeshUVQFront,
@@ -84,9 +85,10 @@ module Examples
                     su_mesh.points.push ThProtoBufExtention.to_proto_point3d(pt)
                 }
                 nump = mesh.count_polygons
+                mesh_normal_1 = mesh.normal_at(1)
                 (1..nump).each do |i|
-                su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(mesh.polygon_at(i))
-                su_mesh.normals.push ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(i))
+                    su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(mesh.polygon_at(i))
+                    su_mesh.normals.push ThProtoBufExtention.to_proto_vector3d(mesh_normal_1)
                 end
                 su_face_data.mesh = su_mesh
                 material = face.material

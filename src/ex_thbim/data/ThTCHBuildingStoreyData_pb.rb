@@ -12,6 +12,7 @@ require 'ThTCHSlabData_pb'
 require 'ThTCHRailingData_pb'
 require 'ThTCHOpeningData_pb'
 require 'ThTCHRoomData_pb'
+require 'ThGridLineSyetemData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHBuildingStoreyData.proto", :syntax => :proto3) do
@@ -30,6 +31,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :slabs, :message, 12, "ThTCHSlabData"
       repeated :railings, :message, 13, "ThTCHRailingData"
       repeated :rooms, :message, 14, "ThTCHRoomData"
+      optional :grid_line_system, :message, 15, "ThGridLineSyetemData"
     end
   end
 end

@@ -23,7 +23,7 @@ module Examples
 
     def create_railing_face(group, build_element)
       pts = []
-      build_element.outline.points.each{ |pt|
+      build_element.outline.shell.points.each{ |pt|
         pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
       }
       face = group.entities.add_face(pts)

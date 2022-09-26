@@ -48,36 +48,34 @@ module Examples
       su_project.root.globalId = "su_test_pipe_data"
       entities = Sketchup.active_model.entities
       definition_dic = Hash.new
-      begin
-        entities.each{ |ent|
-          if ent.is_a?(Sketchup::Group)
-            definition = ent.definition
-            name = definition.name
-            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-              su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-              su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
-              su_project.buildings.push su_component_data
-            end
-          elsif ent.is_a?(Sketchup::ComponentInstance)
-            definition = ent.definition
-            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-              if definition_dic[definition].nil?
-                su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-                definition_dic[definition] = su_component_definition
-              elsif
-                su_component_definition = definition_dic[definition]
-              end
-              su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
-              su_project.buildings.push su_component_data
-            end
+      entities.each{ |ent|
+        if ent.is_a?(Sketchup::Group)
+          definition = ent.definition
+          name = definition.name
+          if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+            su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
+            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+            su_project.buildings.push su_component_data
           end
-        }
-      rescue => e
-        e.message
-      end
-
+        elsif ent.is_a?(Sketchup::ComponentInstance)
+          definition = ent.definition
+          if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+            if definition_dic[definition].nil?
+              su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
+              definition_dic[definition] = su_component_definition
+            elsif
+              su_component_definition = definition_dic[definition]
+            end
+            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+            su_project.buildings.push su_component_data
+          end
+        end
+      }
       begin
+        num = 10
+        buildings = su_project.buildings
         encoded_data_body = ThSUProjectData.encode(su_project)
+        a = encoded_data_body.length
         # 为文件增加头部标识
         Pipe::Client.new('THSU2P3DPIPE') do |pipe|
           encoded_data_head = [84, 72, 1, 2, 0, 0, 0, 0, 0, 0]
@@ -95,6 +93,34 @@ module Examples
           outfile.write(encoded_data)
           outfile.close
         end
+      rescue => e
+        e.message
+      end
+    end
+
+    def self.testMesh
+      begin
+        pm = Geom::PolygonMesh.new
+        pm.add_point([ 0, 0, 0]) # 1
+        pm.add_point([10, 0, 0]) # 2
+        pm.add_point([10,10, 0]) # 3
+        pm.add_point([ 0,20, 0]) # 4
+        pm.add_point([ 0,10, 0]) # 4
+        # pm.add_point([20, 0, 5]) # 5
+        # pm.add_point([20,10, 5]) # 6
+        pm.add_polygon(1, 2, 3, 4, 5)
+        # pm.add_polygon(2, 5, 6, 3)
+        # Create a new group that we will populate with the mesh.
+        group = Sketchup.active_model.entities.add_group
+        material = Sketchup.active_model.materials.add('red')
+        smooth_flags = Geom::PolygonMesh::HIDE_BASED_ON_INDEX
+        group.entities.fill_from_mesh(pm, true, smooth_flags, material)
+
+        entities = Sketchup.active_model.entities
+        curve = entities.add_curve [0,0,0], [0,10,0], [5,20,0]
+        curve1 = entities.add_curve [50,0,0], [50,10,0]
+        new_path = Layout::Path.new([0,0,0],  [0,10,0])
+        new_path.append_point([5,20,0])
       rescue => e
         e.message
       end
@@ -129,6 +155,7 @@ module Examples
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
+            # self.testMesh
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"
