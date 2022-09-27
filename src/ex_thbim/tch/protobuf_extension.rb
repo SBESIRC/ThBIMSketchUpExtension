@@ -70,31 +70,43 @@ module Examples
         def to_ptoto_comp_definition_data(comp_def)
             su_component_definition = ThSUCompDefinitionData.new
             su_component_definition.definition_name = comp_def.name
-            faces = comp_def.entities.grep(Sketchup::Face)
-            faces.each{ |face|
-                # 0: Include PolygonMeshPoints,
-                # 1: Include PolygonMeshUVQFront,
-                # 2: Include PolygonMeshUVQBack,
-                # 4: Include PolygonMeshNormals.
-                su_face_data = ThSUFaceData.new
-                mesh = face.mesh(4)
-                su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
-                su_mesh = ThSUPolygonMesh.new
-                mesh.points.each{ |pt|
-                    su_mesh.points.push ThProtoBufExtention.to_proto_point3d(pt)
-                }
-                mesh.polygons.each{ |polygon|
-                    su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
-                }
-                su_face_data.mesh = su_mesh
-                material = face.material
-                if !material.nil?
-                    su_material = ThProtoBufExtention.to_proto_material(material)
-                    su_face_data.material = su_material
-                end
-                su_component_definition.faces.push su_face_data
-            }
+            tr = Geom::Transformation.new
+            to_proto_comp_definition_face_data(su_component_definition.faces, comp_def, tr)
             su_component_definition
+        end
+
+        def to_proto_comp_definition_face_data(face_collection, comp_def, tr)
+            comp_def_instance = comp_def.entities.grep(Sketchup::ComponentInstance)
+            if comp_def_instance.length > 0
+                comp_def_instance.each{ |ent_instance|
+                    to_proto_comp_definition_face_data(face_collection, ent_instance.definition, tr * ent_instance.transformation)
+                }
+            else
+                faces = comp_def.entities.grep(Sketchup::Face)
+                faces.each{ |face|
+                    # 0: Include PolygonMeshPoints,
+                    # 1: Include PolygonMeshUVQFront,
+                    # 2: Include PolygonMeshUVQBack,
+                    # 4: Include PolygonMeshNormals.
+                    su_face_data = ThSUFaceData.new
+                    mesh = face.mesh(4)
+                    su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
+                    su_mesh = ThSUPolygonMesh.new
+                    mesh.points.each{ |pt|
+                        su_mesh.points.push ThProtoBufExtention.to_proto_point3d(tr * pt)
+                    }
+                    mesh.polygons.each{ |polygon|
+                        su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
+                    }
+                    su_face_data.mesh = su_mesh
+                    material = face.material
+                    if !material.nil?
+                        su_material = ThProtoBufExtention.to_proto_material(material)
+                        su_face_data.material = su_material
+                    end
+                    face_collection.push su_face_data
+                }
+            end
         end
 
         def su_project_add_definition(su_project, su_definition)

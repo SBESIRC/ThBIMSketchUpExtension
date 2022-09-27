@@ -7,7 +7,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUMaterialData.proto", :syntax => :proto3) do
     add_message "ThSUMaterialData" do
       optional :material_name, :string, 1
-      optional :alpha, :int32, 2
+      optional :alpha, :float, 2
       optional :hasRGB, :bool, 3
       proto3_optional :color_r, :int32, 4
       proto3_optional :color_g, :int32, 5
