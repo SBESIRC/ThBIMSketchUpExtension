@@ -4,6 +4,7 @@
 require 'google/protobuf'
 
 require 'ThSUGeometry_pb'
+require 'ThTCHGeometry_pb'
 require 'ThSUMaterialData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
@@ -11,6 +12,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThSUFaceData" do
       optional :mesh, :message, 1, "ThSUPolygonMesh"
       optional :material, :message, 2, "ThSUMaterialData"
+      optional :face_normal, :message, 3, "ThTCHVector3d"
     end
   end
 end

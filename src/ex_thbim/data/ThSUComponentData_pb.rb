@@ -10,7 +10,7 @@ require 'ThSUCompDefinitionData_pb'
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUComponentData.proto", :syntax => :proto3) do
     add_message "ThSUComponentData" do
-      optional :definition, :message, 1, "ThSUCompDefinitionData"
+      optional :definition_index, :int32, 1
       optional :transformations, :message, 2, "ThTCHMatrix3d"
       optional :material, :message, 3, "ThSUMaterialData"
     end

@@ -5,12 +5,14 @@ require 'google/protobuf'
 
 require 'ThTCHRootData_pb'
 require 'ThSUBuildingElementData_pb'
+require 'ThSUCompDefinitionData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUProjectData.proto", :syntax => :proto3) do
     add_message "ThSUProjectData" do
       optional :root, :message, 1, "ThTCHRootData"
       repeated :buildings, :message, 2, "ThSUBuildingElementData"
+      repeated :definitions, :message, 3, "ThSUCompDefinitionData"
     end
   end
 end

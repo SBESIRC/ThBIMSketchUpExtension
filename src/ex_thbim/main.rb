@@ -54,7 +54,8 @@ module Examples
           name = definition.name
           if definition.name != "Laura" and !definition.name.include?("ThDefinition")
             su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+            su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, su_component_definition)
+            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_definition_index)
             su_project.buildings.push su_component_data
           end
         elsif ent.is_a?(Sketchup::ComponentInstance)
@@ -62,18 +63,17 @@ module Examples
           if definition.name != "Laura" and !definition.name.include?("ThDefinition")
             if definition_dic[definition].nil?
               su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-              definition_dic[definition] = su_component_definition
+              su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, su_component_definition)
+              definition_dic[definition] = su_definition_index
             elsif
-              su_component_definition = definition_dic[definition]
+              su_definition_index = definition_dic[definition]
             end
-            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_component_definition)
+            su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_definition_index)
             su_project.buildings.push su_component_data
           end
         end
       }
       begin
-        num = 10
-        buildings = su_project.buildings
         encoded_data_body = ThSUProjectData.encode(su_project)
         a = encoded_data_body.length
         # 为文件增加头部标识

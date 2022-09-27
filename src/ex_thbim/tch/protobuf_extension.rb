@@ -71,7 +71,6 @@ module Examples
             su_component_definition = ThSUCompDefinitionData.new
             su_component_definition.definition_name = comp_def.name
             faces = comp_def.entities.grep(Sketchup::Face)
-            f_length = faces.length
             faces.each{ |face|
                 # 0: Include PolygonMeshPoints,
                 # 1: Include PolygonMeshUVQFront,
@@ -79,17 +78,14 @@ module Examples
                 # 4: Include PolygonMeshNormals.
                 su_face_data = ThSUFaceData.new
                 mesh = face.mesh(4)
+                su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
                 su_mesh = ThSUPolygonMesh.new
-                pts = mesh.points
-                pts.each{ |pt|
+                mesh.points.each{ |pt|
                     su_mesh.points.push ThProtoBufExtention.to_proto_point3d(pt)
                 }
-                nump = mesh.count_polygons
-                mesh_normal_1 = mesh.normal_at(1)
-                (1..nump).each do |i|
-                    su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(mesh.polygon_at(i))
-                    su_mesh.normals.push ThProtoBufExtention.to_proto_vector3d(mesh_normal_1)
-                end
+                mesh.polygons.each{ |polygon|
+                    su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
+                }
                 su_face_data.mesh = su_mesh
                 material = face.material
                 if !material.nil?
@@ -101,10 +97,15 @@ module Examples
             su_component_definition
         end
 
-        def to_proto_component_data(ent, su_component_definition)
+        def su_project_add_definition(su_project, su_definition)
+            su_project.definitions.push su_definition
+            return su_project.definitions.length - 1
+        end
+
+        def to_proto_component_data(ent, su_component_definition_index)
             su_component_data = ThSUBuildingElementData.new
             su_component_instance = ThSUComponentData.new
-            su_component_instance.definition = su_component_definition
+            su_component_instance.definition_index = su_component_definition_index
             su_component_instance.transformations = ThProtoBufExtention.to_proto_transformation(ent.transformation)
             material = ent.material
             if !material.nil?
