@@ -4,7 +4,6 @@
 require 'google/protobuf'
 
 require 'ThSUFaceData_pb'
-require 'ThTCHGeometry_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUCompDefinitionData.proto", :syntax => :proto3) do

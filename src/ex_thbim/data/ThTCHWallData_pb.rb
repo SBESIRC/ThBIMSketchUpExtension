@@ -20,8 +20,14 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :doors, :message, 6, "ThTCHDoorData"
       repeated :windows, :message, 7, "ThTCHWindowData"
       repeated :openings, :message, 8, "ThTCHOpeningData"
+      optional :wall_type, :enum, 9, "WallTypeEnum"
+    end
+    add_enum "WallTypeEnum" do
+      value :PARTITIONING, 0
+      value :SHEAR, 1
     end
   end
 end
 
 ThTCHWallData = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHWallData").msgclass
+WallTypeEnum = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("WallTypeEnum").enummodule

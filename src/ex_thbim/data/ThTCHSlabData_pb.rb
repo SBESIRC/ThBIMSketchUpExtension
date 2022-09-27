@@ -11,8 +11,14 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThTCHSlabData" do
       optional :build_element, :message, 1, "ThTCHBuiltElementData"
       repeated :descendings, :message, 2, "ThTCHDescendingData"
+      optional :slab_type, :enum, 3, "SlabTypeEnum"
+    end
+    add_enum "SlabTypeEnum" do
+      value :FLOOR, 0
+      value :BASE_SLAB, 1
     end
   end
 end
 
 ThTCHSlabData = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("ThTCHSlabData").msgclass
+SlabTypeEnum = ::Google::Protobuf::DescriptorPool.generated_pool.lookup("SlabTypeEnum").enummodule

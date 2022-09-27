@@ -14,6 +14,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :x_line2_point, :message, 3, "ThTCHPoint3d"
       optional :dim_line_point, :message, 4, "ThTCHPoint3d"
       optional :mark, :string, 5
+      repeated :dim_lines, :message, 6, "ThTCHLine"
     end
     add_message "ThDimensionGroupData" do
       optional :root, :message, 1, "ThTCHRootData"

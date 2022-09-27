@@ -10,7 +10,6 @@ require 'ThTCHGeometry_pb'
 require 'ThTCHWindowData_pb'
 require 'ThTCHSlabData_pb'
 require 'ThTCHRailingData_pb'
-require 'ThTCHOpeningData_pb'
 require 'ThTCHRoomData_pb'
 require 'ThGridLineSyetemData_pb'
 
