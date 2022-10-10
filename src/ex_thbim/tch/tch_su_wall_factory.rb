@@ -75,11 +75,20 @@ module Examples
     end
 
     def create_wall_face(group, build_element)
-      pts = []
-      build_element.outline.shell.points.each{ |pt|
-        pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
+      # pts = []
+      # build_element.outline.shell.points.each{ |pt|
+      #   pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
+      # }
+      edges = []
+      points = build_element.outline.shell.points
+      build_element.outline.shell.segments.each{ |segment|
+        if segment.index.length == 2
+          edges.push ThTCH2SUGeomUtil.to_su_line_edge(group, points[segment.index[0]], points[segment.index[1]])
+        else
+          edges = edges + ThTCH2SUGeomUtil.to_su_curve_edge(group, points[segment.index[0]], points[segment.index[1]], points[segment.index[2]])
+        end
       }
-      face = group.entities.add_face(pts)
+      face = group.entities.add_face(edges)
     end
 
     def create_opening_face(group, build_element)
