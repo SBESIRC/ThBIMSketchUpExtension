@@ -75,10 +75,6 @@ module Examples
     end
 
     def create_wall_face(group, build_element)
-      # pts = []
-      # build_element.outline.shell.points.each{ |pt|
-      #   pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
-      # }
       edges = []
       points = build_element.outline.shell.points
       build_element.outline.shell.segments.each{ |segment|

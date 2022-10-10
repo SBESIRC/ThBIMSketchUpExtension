@@ -97,42 +97,6 @@ module Examples
       end
     end
 
-    def self.testMesh
-      begin
-        # pm = Geom::PolygonMesh.new
-        # pm.add_point([ 0, 0, 0]) # 1
-        # pm.add_point([10, 0, 0]) # 2
-        # pm.add_point([10,10, 0]) # 3
-        # pm.add_point([ 0,20, 0]) # 4
-        # pm.add_point([ 0,10, 0]) # 4
-        # # pm.add_point([20, 0, 5]) # 5
-        # # pm.add_point([20,10, 5]) # 6
-        # pm.add_polygon(1, 2, 3, 4, 5)
-        # # pm.add_polygon(2, 5, 6, 3)
-        # # Create a new group that we will populate with the mesh.
-        # group = Sketchup.active_model.entities.add_group
-        # material = Sketchup.active_model.materials.add('red')
-        # smooth_flags = Geom::PolygonMesh::HIDE_BASED_ON_INDEX
-        # group.entities.fill_from_mesh(pm, true, smooth_flags, material)
-
-        model = Sketchup.active_model
-        entities = model.active_entities
-        center_point1 = Geom::Point3d.new(0,0,0)
-        center_point2 = Geom::Point3d.new(0,0,10)
-        center_point3 = Geom::Point3d.new(0,0,20)
-        center_point4 = Geom::Point3d.new(0,0,30)
-        # Create an arc perpendicular to the normal or Z axis
-        normal = Geom::Vector3d.new(0, 0, 1)
-        xaxis = Geom::Vector3d.new(1, 0, 0)
-        edges = entities.add_arc(center_point1, xaxis, normal, 10, 10.degrees, 90.degrees)
-        edges = entities.add_arc(center_point2, xaxis, normal, 10, -270.degrees, 10.degrees)
-        edges = entities.add_arc(center_point3, xaxis, normal, 10, -270.degrees, -350.degrees)
-        edges = entities.add_arc(center_point4, xaxis, normal, 10, -350.degrees, -270.degrees)
-      rescue => e
-        e.message
-      end
-    end
-
     def self.Show_ToolBar
       toolbar = UI::Toolbar.new "CAD插件"                   # 创建一个名为Test工具条
       if toolbar.visible? and toolbar.length > 0
@@ -162,7 +126,6 @@ module Examples
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
             self.get_su_build_info
-            # self.testMesh
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"

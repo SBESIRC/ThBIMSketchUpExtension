@@ -116,12 +116,7 @@ module Examples
       # Create a circle perpendicular to the provided vector.
       normal = Z_AXIS
       xaxis = X_AXIS
-      # angle1 = ((Geom::Point3d.new(x1, y1, z1) - center_point).angle_between xaxis).radians
-      # angle2 = ((Geom::Point3d.new(x3, y3, z3) - center_point).angle_between xaxis).radians
-      # angle3 = angle_in_plane(Geom::Point3d.new(x1, y1, z1) - center_point, xaxis).radians
-      # angle4 = angle_in_plane(Geom::Point3d.new(x3, y3, z3) - center_point, xaxis).radians
       min_angle, max_angle = calculate_arc_angle(Geom::Point3d.new(x1, y1, z1) - center_point,Geom::Point3d.new(x2, y2, z2) - center_point,Geom::Point3d.new(x3, y3, z3) - center_point)
-      # edges = group.entities.add_arc(center_point, xaxis, Z_AXIS, r, angle3.degrees, angle4.degrees)
       edges = group.entities.add_arc(center_point, xaxis, Z_AXIS, r, min_angle, max_angle)
     end
 
