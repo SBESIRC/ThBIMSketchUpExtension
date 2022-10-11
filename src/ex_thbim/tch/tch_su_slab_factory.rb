@@ -54,37 +54,25 @@ module Examples
     end
 
     def create_slab_face(group, build_element)
-      pts = []
-      build_element.outline.shell.points.each{ |pt|
-        pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
-      }
-      face = group.entities.add_face(pts)
+      face = ThTCH2SUGeomUtil.to_su_face(group, build_element.outline.shell)
     end
 
     def create_slab_hole_face(group, descending)
-        pts = []
         tr = Geom::Transformation.new(Geom::Point3d.new(0, 0, 1.mm))
-        descending.outline.shell.points.each{ |pt|
-          pts.push tr * ThTCH2SUGeomUtil.to_su_point3d(pt)
-        }
-        face = group.entities.add_face(pts)
+        face = ThTCH2SUGeomUtil.to_su_face(group, descending.outline.shell)
+        v = group.entities.transform_entities(tr, face)
+        face
     end
 
     def create_descending_face(group, descending)
-        pts = []
         tr = Geom::Transformation.new(Geom::Point3d.new(0, 0, 1.mm))
-        descending.outline.shell.points.each{ |pt|
-          pts.push tr * ThTCH2SUGeomUtil.to_su_point3d(pt)
-        }
-        face = group.entities.add_face(pts)
+        face = ThTCH2SUGeomUtil.to_su_face(group, descending.outline.shell)
+        v = group.entities.transform_entities(tr, face)
+        face
     end
 
     def create_descending_buffer_face(group, descending)
-        pts = []
-        descending.outline_buffer.shell.points.each{ |pt|
-          pts.push ThTCH2SUGeomUtil.to_su_point3d(pt)
-        }
-        face = group.entities.add_face(pts)
+        face = ThTCH2SUGeomUtil.to_su_face(group, descending.outline_buffer.shell)
     end
 
   end # module HelloCube

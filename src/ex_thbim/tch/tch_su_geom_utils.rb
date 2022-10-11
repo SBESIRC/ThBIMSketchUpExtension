@@ -23,6 +23,19 @@ module Examples
       Geom::Transformation.new(arr)
     end
 
+    def to_su_face(group, polyline)
+      edges = []
+      points = polyline.points
+      polyline.segments.each{ |segment|
+        if segment.index.length == 2
+          edges.push to_su_line_edge(group, points[segment.index[0]], points[segment.index[1]])
+        else
+          edges = edges + to_su_curve_edge(group, points[segment.index[0]], points[segment.index[1]], points[segment.index[2]])
+        end
+      }
+      face = group.entities.add_face(edges)
+    end
+
     def to_su_edge_3pt(pt1, pt2, pt3)
       x1 = pt1.x.mm
       x2 = pt2.x.mm
