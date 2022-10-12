@@ -3,9 +3,6 @@
 
 require 'google/protobuf'
 
-require 'ThSUGeometry_pb'
-require 'ThTCHGeometry_pb'
-require 'ThSUMaterialData_pb'
 require 'ThSULoopData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
