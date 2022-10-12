@@ -147,7 +147,9 @@ module Examples
       menu.add_item('CAD插件') {
         self.Show_ToolBar
       }
-      file_loaded(__FILE__)
+      # 主动调用一次使ToolBar先显示出来
+      self.Show_ToolBar
+      # file_loaded(__FILE__)
     end
   end # module HelloCube
 end # module Examples

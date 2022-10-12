@@ -11,7 +11,6 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
     add_message "ThSUComponentData" do
       optional :definition_index, :int32, 1
       optional :transformations, :message, 2, "ThTCHMatrix3d"
-      optional :material, :message, 3, "ThSUMaterialData"
     end
   end
 end

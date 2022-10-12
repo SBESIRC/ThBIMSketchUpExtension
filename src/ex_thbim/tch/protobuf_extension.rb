@@ -84,26 +84,14 @@ module Examples
             else
                 faces = comp_def.entities.grep(Sketchup::Face)
                 faces.each{ |face|
-                    # 0: Include PolygonMeshPoints,
-                    # 1: Include PolygonMeshUVQFront,
-                    # 2: Include PolygonMeshUVQBack,
-                    # 4: Include PolygonMeshNormals.
                     su_face_data = ThSUFaceData.new
-                    mesh = face.mesh(4)
-                    su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
-                    su_mesh = ThSUPolygonMesh.new
-                    mesh.points.each{ |pt|
-                        su_mesh.points.push ThProtoBufExtention.to_proto_point3d(tr * pt)
+                    face.loops.each{ |su_loop|
+                        if su_loop.outer?
+                            su_face_data.outer_loop = to_proto_loop_data(su_loop)
+                        else
+                            su_face_data.inner_loops.push to_proto_loop_data(su_loop)
+                        end
                     }
-                    mesh.polygons.each{ |polygon|
-                        su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
-                    }
-                    su_face_data.mesh = su_mesh
-                    material = face.material
-                    if !material.nil?
-                        su_material = ThProtoBufExtention.to_proto_material(material)
-                        su_face_data.material = su_material
-                    end
                     face_collection.push su_face_data
                 }
             end
@@ -119,16 +107,19 @@ module Examples
             su_component_instance = ThSUComponentData.new
             su_component_instance.definition_index = su_component_definition_index
             su_component_instance.transformations = ThProtoBufExtention.to_proto_transformation(ent.transformation)
-            material = ent.material
-            if !material.nil?
-                su_material = ThProtoBufExtention.to_proto_material(material)
-                su_component_instance.material = su_material
-            end
             su_component_data.component = su_component_instance
             su_component_data.root = ThTCHRootData.new
             su_component_data.root.globalId = ent.entityID.to_s
             su_component_data.root.name = ent.name.to_s
             su_component_data
+        end
+
+        def to_proto_loop_data(su_loop)
+            su_loop_data = ThSULoopData.new
+            su_loop.vertices.each{ |v|
+                su_loop_data.points.push to_proto_point3d(v.position)
+            }
+            su_loop_data
         end
 
     end # module ThProtoBufExtention

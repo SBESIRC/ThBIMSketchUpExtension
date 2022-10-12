@@ -6,13 +6,13 @@ require 'google/protobuf'
 require 'ThSUGeometry_pb'
 require 'ThTCHGeometry_pb'
 require 'ThSUMaterialData_pb'
+require 'ThSULoopData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUFaceData.proto", :syntax => :proto3) do
     add_message "ThSUFaceData" do
-      optional :mesh, :message, 1, "ThSUPolygonMesh"
-      optional :material, :message, 2, "ThSUMaterialData"
-      optional :face_normal, :message, 3, "ThTCHVector3d"
+      optional :outer_loop, :message, 1, "ThSULoopData"
+      repeated :inner_loops, :message, 2, "ThSULoopData"
     end
   end
 end
