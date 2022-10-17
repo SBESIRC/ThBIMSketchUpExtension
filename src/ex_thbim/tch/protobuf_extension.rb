@@ -67,6 +67,44 @@ module Examples
             proto_matrix
         end
 
+        def to_proto_definition_data(ent, tr)
+            definition_datas = []
+            definition = ent.definition
+            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+                ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
+                if !ifc_type.nil? or (inside_ents = definition.entities.grep(Sketchup::ComponentInstance)) # .select{ |e| e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)}).length == 0
+                    su_component_definition = ThSUCompDefinitionData.new
+                    su_component_definition.definition_name = definition.name
+                    if !ifc_type.nil?
+                        su_component_definition.ifc_classification = ifc_type
+                    end
+                    faces = definition.entities.grep(Sketchup::Face)
+                    faces.each{ |face|
+                        su_face_data = ThSUFaceData.new
+                        face.loops.each{ |su_loop|
+                            if su_loop.outer?
+                                su_face_data.outer_loop = to_proto_loop_data(su_loop)
+                            else
+                                su_face_data.inner_loops.push to_proto_loop_data(su_loop)
+                            end
+                        }
+                        su_component_definition.faces.push su_face_data
+                    }
+                    if faces.length > 0
+                        definition_datas.push [su_component_definition, to_su_component_data(ent, tr)]
+                    end
+                else
+                    inside_ents.each{ |e|
+                        inside_definition_datas = to_proto_definition_data(e, tr * e.transformation)
+                        if inside_definition_datas.length > 0
+                            definition_datas = definition_datas + inside_definition_datas
+                        end
+                    }
+                end
+            end
+            definition_datas
+        end
+
         def to_ptoto_comp_definition_data(comp_def)
             su_component_definition = ThSUCompDefinitionData.new
             su_component_definition.definition_name = comp_def.name
@@ -87,9 +125,9 @@ module Examples
                     su_face_data = ThSUFaceData.new
                     face.loops.each{ |su_loop|
                         if su_loop.outer?
-                            su_face_data.outer_loop = to_proto_loop_data(su_loop)
+                            su_face_data.outer_loop = to_proto_loop_data(su_loop) #, tr)
                         else
-                            su_face_data.inner_loops.push to_proto_loop_data(su_loop)
+                            su_face_data.inner_loops.push to_proto_loop_data(su_loop) #, tr)
                         end
                     }
                     face_collection.push su_face_data
@@ -111,6 +149,17 @@ module Examples
             su_component_data.root = ThTCHRootData.new
             su_component_data.root.globalId = ent.entityID.to_s
             su_component_data.root.name = ent.name.to_s
+            su_component_data
+        end
+
+        def to_su_component_data(ent, tr)
+            su_component_data = ThSUBuildingElementData.new
+            su_component_data.root = ThTCHRootData.new
+            su_component_data.root.globalId = ent.entityID.to_s
+            su_component_data.root.name = ent.name.to_s
+            su_component_data.component = ThSUComponentData.new
+            su_component_data.component.transformations = ThProtoBufExtention.to_proto_transformation(tr)
+            su_component_data.component.definition_index = -1
             su_component_data
         end
 

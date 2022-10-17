@@ -9,7 +9,8 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUCompDefinitionData.proto", :syntax => :proto3) do
     add_message "ThSUCompDefinitionData" do
       optional :definition_name, :string, 1
-      repeated :faces, :message, 2, "ThSUFaceData"
+      optional :ifc_classification, :string, 2
+      repeated :faces, :message, 3, "ThSUFaceData"
     end
   end
 end
