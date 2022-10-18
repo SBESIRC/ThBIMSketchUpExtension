@@ -108,7 +108,7 @@ module Examples
       begin
         encoded_data_body = ThSUProjectData.encode(su_project)
         # 为文件增加头部标识
-        Pipe::Client.new('THSUMODEL2P3DPIPE') do |pipe|
+        Pipe::Client.new('THSU2P3DIPE') do |pipe|
           encoded_data_head = [84, 72, 1, 2, 0, 0, 0, 0, 0, 0]
           encoded_data = encoded_data_head.pack('C*') + encoded_data_body
           pipe.writeCadPipeData(encoded_data)

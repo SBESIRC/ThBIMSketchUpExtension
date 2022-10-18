@@ -77,6 +77,17 @@ module Examples
                     su_component_definition.definition_name = definition.name
                     if !ifc_type.nil?
                         su_component_definition.ifc_classification = ifc_type
+                    elsif !(ent_layer = ent.layer).nil?
+                        case ent_layer.name
+                        when "S_BEAM"
+                            su_component_definition.ifc_classification = "IfcBeam"
+                        when "S_COLU"
+                            su_component_definition.ifc_classification = "IfcColumn"
+                        when "S_FLOOR", "S_SLAB"
+                            su_component_definition.ifc_classification = "IfcSlab"
+                        when "S_WALL"
+                            su_component_definition.ifc_classification = "IfcWall"
+                        end
                     end
                     faces = definition.entities.grep(Sketchup::Face)
                     faces.each{ |face|
