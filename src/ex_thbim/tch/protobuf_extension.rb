@@ -89,9 +89,13 @@ module Examples
                             su_component_definition.ifc_classification = "IfcWall"
                         end
                     end
+                    ent_name = ent.name
+                    if !ent_name.nil?
+                        su_component_definition.instance_name = ent_name
+                    end
                     faces = definition.entities.grep(Sketchup::Face)
                     faces.each{ |face|
-                        su_face_data = ThSUFaceData.new
+                        su_face_data = ThSUFaceBrepData.new
                         face.loops.each{ |su_loop|
                             if su_loop.outer?
                                 su_face_data.outer_loop = to_proto_loop_data(su_loop)
@@ -99,7 +103,7 @@ module Examples
                                 su_face_data.inner_loops.push to_proto_loop_data(su_loop)
                             end
                         }
-                        su_component_definition.faces.push su_face_data
+                        su_component_definition.brep_faces.push su_face_data
                     }
                     if faces.length > 0
                         definition_datas.push [su_component_definition, to_su_component_data(ent, tr)]
@@ -107,6 +111,62 @@ module Examples
                 else
                     inside_ents.each{ |e|
                         inside_definition_datas = to_proto_definition_data(e, tr * e.transformation)
+                        if inside_definition_datas.length > 0
+                            definition_datas = definition_datas + inside_definition_datas
+                        end
+                    }
+                end
+            end
+            definition_datas
+        end
+
+        def to_proto_definition_data_mesh(ent, tr)
+            definition_datas = []
+            definition = ent.definition
+            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+                ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
+                if !ifc_type.nil? or (inside_ents = definition.entities.grep(Sketchup::ComponentInstance)) # .select{ |e| e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)}).length == 0
+                    su_component_definition = ThSUCompDefinitionData.new
+                    su_component_definition.definition_name = definition.name
+                    if !ifc_type.nil?
+                        su_component_definition.ifc_classification = ifc_type
+                    elsif !(ent_layer = ent.layer).nil?
+                        case ent_layer.name
+                        when "S_BEAM"
+                            su_component_definition.ifc_classification = "IfcBeam"
+                        when "S_COLU"
+                            su_component_definition.ifc_classification = "IfcColumn"
+                        when "S_FLOOR", "S_SLAB"
+                            su_component_definition.ifc_classification = "IfcSlab"
+                        when "S_WALL"
+                            su_component_definition.ifc_classification = "IfcWall"
+                        end
+                    end
+                    ent_name = ent.name
+                    if !ent_name.nil?
+                        su_component_definition.instance_name = ent_name
+                    end
+                    faces = definition.entities.grep(Sketchup::Face)
+                    faces.each{ |face|
+                        su_face_data = ThSUFaceMeshData.new
+                        mesh = face.mesh(4)
+                        su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
+                        su_mesh = ThSUPolygonMesh.new
+                        mesh.points.each{ |pt|
+                            su_mesh.points.push ThProtoBufExtention.to_proto_point3d(pt)
+                        }
+                        mesh.polygons.each{ |polygon|
+                            su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
+                        }
+                        su_face_data.mesh = su_mesh
+                        su_component_definition.mesh_faces.push su_face_data
+                    }
+                    if faces.length > 0
+                        definition_datas.push [su_component_definition, to_su_component_data(ent, tr)]
+                    end
+                else
+                    inside_ents.each{ |e|
+                        inside_definition_datas = to_proto_definition_data_mesh(e, tr * e.transformation)
                         if inside_definition_datas.length > 0
                             definition_datas = definition_datas + inside_definition_datas
                         end

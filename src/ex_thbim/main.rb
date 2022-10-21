@@ -47,6 +47,7 @@ module Examples
       su_project.root = ThTCHRootData.new
       su_project.root.name = "测试项目"
       su_project.root.globalId = "su_test_pipe_data"
+      su_project.is_face_mesh = false
       entities = Sketchup.active_model.entities
       # definition_dic = Hash.new
       entities.each{ |ent|
@@ -83,6 +84,32 @@ module Examples
         #     su_project.buildings.push su_component_data
         #   end
         # end
+      }
+      su_project
+      rescue => e
+        e.message
+      end
+    end
+
+    # 获取SU构建信息并发送至Viewer(SU-mesh-测试用)
+    def self.get_su_build_info_mesh
+      begin
+      su_project = ThSUProjectData.new
+      su_project.root = ThTCHRootData.new
+      su_project.root.name = "测试项目"
+      su_project.root.globalId = "su_test_pipe_data"
+      su_project.is_face_mesh = true
+      entities = Sketchup.active_model.entities
+      # definition_dic = Hash.new
+      entities.each{ |ent|
+        if ent.is_a?(Sketchup::Group) or ent.is_a?(Sketchup::ComponentInstance)
+          definition_datas = ThProtoBufExtention.to_proto_definition_data_mesh(ent, ent.transformation)
+          definition_datas.each{ |definition_data|
+            su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, definition_data[0])
+            definition_data[1].component.definition_index = su_definition_index
+            su_project.buildings.push definition_data[1]
+          }
+        end
       }
       su_project
       rescue => e
@@ -175,12 +202,36 @@ module Examples
           command_tool3.tooltip = "Push To Viewer"                      # 对该工具的一些说明
           command_tool3.status_bar_text = "推送至 Viewer" # 在状态栏中显示的内容
 
+          # Command4
+          command_tool4 = UI::Command.new("推送数据至Server-SUMesh") {           # 创建一个工具名为Test的命令
+            su_project = self.get_su_build_info_mesh
+            self.push_to_server(su_project)
+          }
+          command_tool4.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
+          command_tool4.large_icon = "Img/ToViewer.png"
+          command_tool4.tooltip = "Push To Server-SUMesh"                      # 对该工具的一些说明
+          command_tool4.status_bar_text = "推送至 Server-SUMesh" # 在状态栏中显示的内容
+
+          # Command5
+          command_tool5 = UI::Command.new("推送数据至Viewer-SUMesh") {           # 创建一个工具名为Test的命令
+            su_project = self.get_su_build_info_mesh
+            self.push_to_viewer(su_project)
+          }
+          command_tool5.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
+          command_tool5.large_icon = "Img/ToViewer.png"
+          command_tool5.tooltip = "Push To Viewer-SUMesh"                      # 对该工具的一些说明
+          command_tool5.status_bar_text = "推送至 Viewer-SUMesh" # 在状态栏中显示的内容
+
 
           toolbar = toolbar.add_item command_tool1                     # 将这个命名添加到工具条上
           toolbar = toolbar.add_separator                              # 添加分隔符
           toolbar = toolbar.add_item command_tool2                     # 将这个命名添加到工具条上
           toolbar = toolbar.add_separator                              # 添加分隔符
           toolbar = toolbar.add_item command_tool3                     # 将这个命名添加到工具条上
+          # toolbar = toolbar.add_separator                              # 添加分隔符
+          # toolbar = toolbar.add_item command_tool4                     # 将这个命名添加到工具条上
+          # toolbar = toolbar.add_separator                              # 添加分隔符
+          # toolbar = toolbar.add_item command_tool5                     # 将这个命名添加到工具条上
         end
         toolbar.show                                       # 在SktchUp中显示该工具条
       end

@@ -13,6 +13,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :root, :message, 1, "ThTCHRootData"
       repeated :buildings, :message, 2, "ThSUBuildingElementData"
       repeated :definitions, :message, 3, "ThSUCompDefinitionData"
+      optional :is_face_mesh, :bool, 4
     end
   end
 end
