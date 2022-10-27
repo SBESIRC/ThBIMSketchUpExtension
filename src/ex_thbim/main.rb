@@ -42,53 +42,19 @@ module Examples
 
     # 获取SU构建信息并发送至Viewer
     def self.get_su_build_info
-      begin
       su_project = ThSUProjectData.new
       su_project.root = ThTCHRootData.new
       su_project.root.name = "测试项目"
       su_project.root.globalId = "su_test_pipe_data"
       su_project.is_face_mesh = false
       entities = Sketchup.active_model.entities
-      # definition_dic = Hash.new
       entities.each{ |ent|
         if ent.is_a?(Sketchup::Group) or ent.is_a?(Sketchup::ComponentInstance)
-          definition_datas = ThProtoBufExtention.to_proto_definition_data(ent, ent.transformation)
-          definition_datas.each{ |definition_data|
-            su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, definition_data[0])
-            definition_data[1].component.definition_index = su_definition_index
-            su_project.buildings.push definition_data[1]
-          }
+          code = ThProtoBufExtention.get_hash_code(2166136261, ent.entityID)
+          definition_datas = ThProtoBufExtention.to_proto_definition_data(su_project, ent, ent.transformation, code)
         end
-
-        # if ent.is_a?(Sketchup::Group)
-        #   definition = ent.definition
-        #   # ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
-        #   name = definition.name
-        #   if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-        #     su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-        #     su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, su_component_definition)
-        #     su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_definition_index)
-        #     su_project.buildings.push su_component_data
-        #   end
-        # elsif ent.is_a?(Sketchup::ComponentInstance)
-        #   definition = ent.definition
-        #   if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-        #     if definition_dic[definition].nil?
-        #       su_component_definition = ThProtoBufExtention.to_ptoto_comp_definition_data(definition)
-        #       su_definition_index = ThProtoBufExtention.su_project_add_definition(su_project, su_component_definition)
-        #       definition_dic[definition] = su_definition_index
-        #     elsif
-        #       su_definition_index = definition_dic[definition]
-        #     end
-        #     su_component_data = ThProtoBufExtention.to_proto_component_data(ent, su_definition_index)
-        #     su_project.buildings.push su_component_data
-        #   end
-        # end
       }
       su_project
-      rescue => e
-        e.message
-      end
     end
 
     # 获取SU构建信息并发送至Viewer(SU-mesh-测试用)

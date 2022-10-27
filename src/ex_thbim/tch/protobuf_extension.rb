@@ -67,14 +67,36 @@ module Examples
             proto_matrix
         end
 
-        def to_proto_definition_data(ent, tr)
-            definition_datas = []
+        def to_proto_definition_data(su_project, ent, tr, hashcode)
             definition = ent.definition
+            su_component_definition = ThSUCompDefinitionData.new
             if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-                ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
-                if !ifc_type.nil? or (inside_ents = definition.entities.grep(Sketchup::ComponentInstance)) # .select{ |e| e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)}).length == 0
-                    su_component_definition = ThSUCompDefinitionData.new
+                su_definition_index = su_project.definitions.index{ |d| d.definition_name == definition.name}
+                definition.entities.each{ |e|
+                    if su_definition_index.nil? and e.is_a?(Sketchup::Face)
+                        su_face_data = ThSUFaceBrepData.new
+                        e.loops.each{ |su_loop|
+                            if su_loop.outer?
+                                su_face_data.outer_loop = to_proto_loop_data(su_loop)
+                            else
+                                su_face_data.inner_loops.push to_proto_loop_data(su_loop)
+                            end
+                        }
+                        su_component_definition.brep_faces.push su_face_data
+                    elsif e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)
+                        to_proto_definition_data(su_project, e, tr * e.transformation, get_hash_code(hashcode, e.entityID))
+                    end
+                }
+                if !su_definition_index.nil?
+                    su_component_data = to_su_component_data(ent, tr, su_definition_index, hashcode)
+                    su_project.buildings.push su_component_data
+                elsif su_component_definition.brep_faces.length > 0
                     su_component_definition.definition_name = definition.name
+                    ent_name = ent.name
+                    if !ent_name.nil?
+                        su_component_definition.instance_name = ent_name
+                    end
+                    ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
                     if !ifc_type.nil?
                         su_component_definition.ifc_classification = ifc_type
                     elsif !(ent_layer = ent.layer).nil?
@@ -89,35 +111,11 @@ module Examples
                             su_component_definition.ifc_classification = "IfcWall"
                         end
                     end
-                    ent_name = ent.name
-                    if !ent_name.nil?
-                        su_component_definition.instance_name = ent_name
-                    end
-                    faces = definition.entities.grep(Sketchup::Face)
-                    faces.each{ |face|
-                        su_face_data = ThSUFaceBrepData.new
-                        face.loops.each{ |su_loop|
-                            if su_loop.outer?
-                                su_face_data.outer_loop = to_proto_loop_data(su_loop)
-                            else
-                                su_face_data.inner_loops.push to_proto_loop_data(su_loop)
-                            end
-                        }
-                        su_component_definition.brep_faces.push su_face_data
-                    }
-                    if faces.length > 0
-                        definition_datas.push [su_component_definition, to_su_component_data(ent, tr)]
-                    end
-                else
-                    inside_ents.each{ |e|
-                        inside_definition_datas = to_proto_definition_data(e, tr * e.transformation)
-                        if inside_definition_datas.length > 0
-                            definition_datas = definition_datas + inside_definition_datas
-                        end
-                    }
+                    su_definition_index = su_project_add_definition(su_project, su_component_definition)
+                    su_component_data = to_su_component_data(ent, tr, su_definition_index, hashcode)
+                    su_project.buildings.push su_component_data
                 end
             end
-            definition_datas
         end
 
         def to_proto_definition_data_mesh(ent, tr)
@@ -218,19 +216,19 @@ module Examples
             su_component_instance.transformations = ThProtoBufExtention.to_proto_transformation(ent.transformation)
             su_component_data.component = su_component_instance
             su_component_data.root = ThTCHRootData.new
-            su_component_data.root.globalId = ent.entityID.to_s
+            su_component_data.root.globalId = ent.entityID.to_s + su_component_definition_index.to_s
             su_component_data.root.name = ent.name.to_s
             su_component_data
         end
 
-        def to_su_component_data(ent, tr)
+        def to_su_component_data(ent, tr, su_component_definition_index, hashcode)
             su_component_data = ThSUBuildingElementData.new
             su_component_data.root = ThTCHRootData.new
-            su_component_data.root.globalId = ent.entityID.to_s
+            su_component_data.root.globalId = hashcode.to_s
             su_component_data.root.name = ent.name.to_s
             su_component_data.component = ThSUComponentData.new
             su_component_data.component.transformations = ThProtoBufExtention.to_proto_transformation(tr)
-            su_component_data.component.definition_index = -1
+            su_component_data.component.definition_index = su_component_definition_index
             su_component_data
         end
 
@@ -240,6 +238,10 @@ module Examples
                 su_loop_data.points.push to_proto_point3d(v.position)
             }
             su_loop_data
+        end
+
+        def get_hash_code(hash, code)
+            hash * 16777619 ^ code
         end
 
     end # module ThProtoBufExtention
