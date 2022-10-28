@@ -9,7 +9,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUComponentData.proto", :syntax => :proto3) do
     add_message "ThSUComponentData" do
       optional :definition_index, :int32, 1
-      optional :transformations, :message, 2, "ThTCHMatrix3d"
+      optional :ifc_classification, :string, 2
+      optional :instance_name, :string, 3
+      optional :transformations, :message, 4, "ThTCHMatrix3d"
     end
   end
 end

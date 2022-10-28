@@ -87,32 +87,16 @@ module Examples
                         to_proto_definition_data(su_project, e, tr * e.transformation, get_hash_code(hashcode, e.entityID))
                     end
                 }
+                if su_component_definition.brep_faces.length > 0
+                    su_component_definition.definition_name = definition.name
+                    su_definition_index = su_project_add_definition(su_project, su_component_definition)
+                end
                 if !su_definition_index.nil?
                     su_component_data = to_su_component_data(ent, tr, su_definition_index, hashcode)
-                    su_project.buildings.push su_component_data
-                elsif su_component_definition.brep_faces.length > 0
-                    su_component_definition.definition_name = definition.name
-                    ent_name = ent.name
-                    if !ent_name.nil?
-                        su_component_definition.instance_name = ent_name
-                    end
                     ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
                     if !ifc_type.nil?
-                        su_component_definition.ifc_classification = ifc_type
-                    elsif !(ent_layer = ent.layer).nil?
-                        case ent_layer.name
-                        when "S_BEAM"
-                            su_component_definition.ifc_classification = "IfcBeam"
-                        when "S_COLU"
-                            su_component_definition.ifc_classification = "IfcColumn"
-                        when "S_FLOOR", "S_SLAB"
-                            su_component_definition.ifc_classification = "IfcSlab"
-                        when "S_WALL"
-                            su_component_definition.ifc_classification = "IfcWall"
-                        end
+                        su_component_data.component.ifc_classification = ifc_type
                     end
-                    su_definition_index = su_project_add_definition(su_project, su_component_definition)
-                    su_component_data = to_su_component_data(ent, tr, su_definition_index, hashcode)
                     su_project.buildings.push su_component_data
                 end
             end
@@ -229,6 +213,22 @@ module Examples
             su_component_data.component = ThSUComponentData.new
             su_component_data.component.transformations = ThProtoBufExtention.to_proto_transformation(tr)
             su_component_data.component.definition_index = su_component_definition_index
+            ent_name = ent.name
+            if !ent_name.nil?
+                su_component_data.component.instance_name = ent_name
+            end
+            if !(ent_layer = ent.layer).nil?
+                case ent_layer.name
+                when "S_BEAM"
+                    su_component_data.component.ifc_classification = "IfcBeam"
+                when "S_COLU"
+                    su_component_data.component.ifc_classification = "IfcColumn"
+                when "S_FLOOR", "S_SLAB"
+                    su_component_data.component.ifc_classification = "IfcSlab"
+                when "S_WALL"
+                    su_component_data.component.ifc_classification = "IfcWall"
+                end
+            end
             su_component_data
         end
 
