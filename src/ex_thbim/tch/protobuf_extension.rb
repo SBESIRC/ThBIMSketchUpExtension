@@ -72,17 +72,21 @@ module Examples
             su_component_definition = ThSUCompDefinitionData.new
             if definition.name != "Laura" and !definition.name.include?("ThDefinition")
                 su_definition_index = su_project.definitions.index{ |d| d.definition_name == definition.name}
+                minz = 1.0e8
                 definition.entities.each{ |e|
-                    if su_definition_index.nil? and e.is_a?(Sketchup::Face)
-                        su_face_data = ThSUFaceBrepData.new
-                        e.loops.each{ |su_loop|
-                            if su_loop.outer?
-                                su_face_data.outer_loop = to_proto_loop_data(su_loop)
-                            else
-                                su_face_data.inner_loops.push to_proto_loop_data(su_loop)
-                            end
-                        }
-                        su_component_definition.brep_faces.push su_face_data
+                    if e.is_a?(Sketchup::Face)
+                        if su_definition_index.nil?
+                            su_face_data = ThSUFaceBrepData.new
+                            e.loops.each{ |su_loop|
+                                if su_loop.outer?
+                                    su_face_data.outer_loop = to_proto_loop_data(su_loop)
+                                else
+                                    su_face_data.inner_loops.push to_proto_loop_data(su_loop)
+                                end
+                            }
+                            su_component_definition.brep_faces.push su_face_data
+                        end
+                        minz = [minz, (tr * e.bounds.center).z.to_mm].min
                     elsif e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)
                         to_proto_definition_data(su_project, e, tr * e.transformation, get_hash_code(hashcode, e.entityID))
                     end
@@ -97,7 +101,34 @@ module Examples
                     if !ifc_type.nil?
                         su_component_data.component.ifc_classification = ifc_type
                     end
-                    su_project.buildings.push su_component_data
+                    storey_index = su_project.building.storeys.index{ |o| o.elevation - 200 < minz and o.elevation + o.height - 200 > minz }
+                    if storey_index.nil?
+                        if su_project.building.storeys.first.elevation >= minz
+                            storey_data = ThSUBuildingStoreyData.new
+                            storey_data.number = su_project.building.storeys.first.number - 1
+                            storey_data.elevation = su_project.building.storeys.first.elevation - 1.0e10
+                            storey_data.height = 1.0e10
+                            storey_data.stdFlr_no = su_project.building.storeys.first.stdFlr_no - 1
+                            if storey_data.number == 0
+                                storey_data.number = -1
+                            end
+                            if storey_data.stdFlr_no == 0
+                                storey_data.stdFlr_no = -1
+                            end
+                            storey_data.buildings.push su_component_data
+                            su_project.building.storeys.insert(0, storey_data)
+                        elsif su_project.building.storeys.last.elevation + su_project.building.storeys.last.height - 200 <= minz
+                            storey_data = ThSUBuildingStoreyData.new
+                            storey_data.number = su_project.building.storeys.last.number + 1
+                            storey_data.elevation = su_project.building.storeys.last.elevation + su_project.building.storeys.last.height
+                            storey_data.height = 1.0e10
+                            storey_data.stdFlr_no = su_project.building.storeys.last.stdFlr_no + 1
+                            storey_data.buildings.push su_component_data
+                            su_project.building.storeys.push storey_data
+                        end
+                    else
+                        su_project.building.storeys[storey_index].buildings.push su_component_data
+                    end
                 end
             end
         end

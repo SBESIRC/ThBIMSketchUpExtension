@@ -3,6 +3,7 @@
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 require 'sketchup.rb'
+require 'json'
 require 'google/protobuf'
 require_relative 'data/ThTCHProjectData_pb'
 require_relative 'data/ThSUProjectData_pb'
@@ -44,9 +45,49 @@ module Examples
     def self.get_su_build_info
       su_project = ThSUProjectData.new
       su_project.root = ThTCHRootData.new
-      su_project.root.name = "测试项目"
+      su_project.root.name = "空项目"
       su_project.root.globalId = "su_test_pipe_data"
       su_project.is_face_mesh = false
+      building_data = ThSUBuildingData.new
+      begin
+        skpfile = Sketchup.active_model.path
+        if skpfile.length > 0
+          su_project.root.name = File.basename(skpfile, ".*")
+          file_path = File.dirname(skpfile)
+          if File.directory? file_path
+            Dir.entries(file_path, encoding:'UTF-8').each{ |file_name|
+              if file_name.include? ".ifc.json"
+                file_full_path = File::join(file_path, file_name)
+                json_string = File.read(file_full_path)
+                json = JSON.parse(json_string)
+                json.each{ |obj|
+                  storey_data = ThSUBuildingStoreyData.new
+                  storey_data.root = ThTCHRootData.new
+                  storey_data.root.globalId = "su_storey_" + obj["No"].to_s
+                  storey_data.root.name = obj["Name"]
+                  storey_data.number = obj["No"]
+                  storey_data.elevation = obj["Elevation"]
+                  storey_data.height = obj["Height"]
+                  storey_data.stdFlr_no = obj["StdFlrNo"]
+                  building_data.storeys.push storey_data
+                }
+                break
+              end
+            }
+          end
+        end
+      rescue => e
+        e.message
+      end
+      if building_data.storeys.length == 0
+        storey_data = ThSUBuildingStoreyData.new
+        storey_data.number = 1 #虚拟楼层
+        storey_data.elevation = -1.0e10
+        storey_data.height = 2.0e10
+        storey_data.stdFlr_no = 1
+        building_data.storeys.push storey_data
+      end
+      su_project.building = building_data
       entities = Sketchup.active_model.entities
       entities.each{ |ent|
         if ent.is_a?(Sketchup::Group) or ent.is_a?(Sketchup::ComponentInstance)
@@ -63,7 +104,7 @@ module Examples
       su_project = ThSUProjectData.new
       su_project.root = ThTCHRootData.new
       su_project.root.name = "测试项目"
-      su_project.root.globalId = "su_test_pipe_data"
+      su_project.root.globalId = "su_pipe_data"
       su_project.is_face_mesh = true
       entities = Sketchup.active_model.entities
       # definition_dic = Hash.new
