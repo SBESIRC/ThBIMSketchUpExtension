@@ -1,4 +1,7 @@
-source 'https://rubygems.org'
+source 'https://mirrors.aliyun.com/rubygems/'
+
+gem 'win32-pipe', '~> 0.4.0'
+gem 'google-protobuf', '~> 3.21', '>= 3.21.9'
 
 group :development do
   gem 'minitest' # Helps solargraph with code insight when you write unit tests.
