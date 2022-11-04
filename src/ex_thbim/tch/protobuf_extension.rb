@@ -105,6 +105,7 @@ module Examples
                     if storey_index.nil?
                         if su_project.building.storeys.first.elevation >= minz
                             storey_data = ThSUBuildingStoreyData.new
+                            storey_data.root = ThTCHRootData.new
                             storey_data.number = su_project.building.storeys.first.number - 1
                             storey_data.elevation = su_project.building.storeys.first.elevation - 1.0e10
                             storey_data.height = 1.0e10
@@ -115,14 +116,17 @@ module Examples
                             if storey_data.stdFlr_no == 0
                                 storey_data.stdFlr_no = -1
                             end
+                            storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
                             storey_data.buildings.push su_component_data
                             su_project.building.storeys.insert(0, storey_data)
                         elsif su_project.building.storeys.last.elevation + su_project.building.storeys.last.height - 200 <= minz
                             storey_data = ThSUBuildingStoreyData.new
+                            storey_data.root = ThTCHRootData.new
                             storey_data.number = su_project.building.storeys.last.number + 1
                             storey_data.elevation = su_project.building.storeys.last.elevation + su_project.building.storeys.last.height
                             storey_data.height = 1.0e10
                             storey_data.stdFlr_no = su_project.building.storeys.last.stdFlr_no + 1
+                            storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
                             storey_data.buildings.push su_component_data
                             su_project.building.storeys.push storey_data
                         end
@@ -133,107 +137,9 @@ module Examples
             end
         end
 
-        def to_proto_definition_data_mesh(ent, tr)
-            definition_datas = []
-            definition = ent.definition
-            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
-                ifc_type = definition.get_attribute("AppliedSchemaTypes", "IFC 2x3")
-                if !ifc_type.nil? or (inside_ents = definition.entities.grep(Sketchup::ComponentInstance)) # .select{ |e| e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)}).length == 0
-                    su_component_definition = ThSUCompDefinitionData.new
-                    su_component_definition.definition_name = definition.name
-                    if !ifc_type.nil?
-                        su_component_definition.ifc_classification = ifc_type
-                    elsif !(ent_layer = ent.layer).nil?
-                        case ent_layer.name
-                        when "S_BEAM"
-                            su_component_definition.ifc_classification = "IfcBeam"
-                        when "S_COLU"
-                            su_component_definition.ifc_classification = "IfcColumn"
-                        when "S_FLOOR", "S_SLAB"
-                            su_component_definition.ifc_classification = "IfcSlab"
-                        when "S_WALL"
-                            su_component_definition.ifc_classification = "IfcWall"
-                        end
-                    end
-                    ent_name = ent.name
-                    if !ent_name.nil?
-                        su_component_definition.instance_name = ent_name
-                    end
-                    faces = definition.entities.grep(Sketchup::Face)
-                    faces.each{ |face|
-                        su_face_data = ThSUFaceMeshData.new
-                        mesh = face.mesh(4)
-                        su_face_data.face_normal = ThProtoBufExtention.to_proto_vector3d(mesh.normal_at(1))
-                        su_mesh = ThSUPolygonMesh.new
-                        mesh.points.each{ |pt|
-                            su_mesh.points.push ThProtoBufExtention.to_proto_point3d(pt)
-                        }
-                        mesh.polygons.each{ |polygon|
-                            su_mesh.polygons.push ThProtoBufExtention.to_proto_polygon(polygon)
-                        }
-                        su_face_data.mesh = su_mesh
-                        su_component_definition.mesh_faces.push su_face_data
-                    }
-                    if faces.length > 0
-                        definition_datas.push [su_component_definition, to_su_component_data(ent, tr)]
-                    end
-                else
-                    inside_ents.each{ |e|
-                        inside_definition_datas = to_proto_definition_data_mesh(e, tr * e.transformation)
-                        if inside_definition_datas.length > 0
-                            definition_datas = definition_datas + inside_definition_datas
-                        end
-                    }
-                end
-            end
-            definition_datas
-        end
-
-        def to_ptoto_comp_definition_data(comp_def)
-            su_component_definition = ThSUCompDefinitionData.new
-            su_component_definition.definition_name = comp_def.name
-            tr = Geom::Transformation.new
-            to_proto_comp_definition_face_data(su_component_definition.faces, comp_def, tr)
-            su_component_definition
-        end
-
-        def to_proto_comp_definition_face_data(face_collection, comp_def, tr)
-            comp_def_instance = comp_def.entities.grep(Sketchup::ComponentInstance)
-            if comp_def_instance.length > 0
-                comp_def_instance.each{ |ent_instance|
-                    to_proto_comp_definition_face_data(face_collection, ent_instance.definition, tr * ent_instance.transformation)
-                }
-            else
-                faces = comp_def.entities.grep(Sketchup::Face)
-                faces.each{ |face|
-                    su_face_data = ThSUFaceData.new
-                    face.loops.each{ |su_loop|
-                        if su_loop.outer?
-                            su_face_data.outer_loop = to_proto_loop_data(su_loop) #, tr)
-                        else
-                            su_face_data.inner_loops.push to_proto_loop_data(su_loop) #, tr)
-                        end
-                    }
-                    face_collection.push su_face_data
-                }
-            end
-        end
-
         def su_project_add_definition(su_project, su_definition)
             su_project.definitions.push su_definition
             return su_project.definitions.length - 1
-        end
-
-        def to_proto_component_data(ent, su_component_definition_index)
-            su_component_data = ThSUBuildingElementData.new
-            su_component_instance = ThSUComponentData.new
-            su_component_instance.definition_index = su_component_definition_index
-            su_component_instance.transformations = ThProtoBufExtention.to_proto_transformation(ent.transformation)
-            su_component_data.component = su_component_instance
-            su_component_data.root = ThTCHRootData.new
-            su_component_data.root.globalId = ent.entityID.to_s + su_component_definition_index.to_s
-            su_component_data.root.name = ent.name.to_s
-            su_component_data
         end
 
         def to_su_component_data(ent, tr, su_component_definition_index, hashcode)
