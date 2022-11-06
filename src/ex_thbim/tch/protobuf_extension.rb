@@ -101,7 +101,7 @@ module Examples
                     if !ifc_type.nil?
                         su_component_data.component.ifc_classification = ifc_type
                     end
-                    storey_index = su_project.building.storeys.index{ |o| o.elevation - 200 < minz and o.elevation + o.height - 200 > minz }
+                    storey_index = su_project.building.storeys.index{ |o| o.elevation - 20 < minz and o.elevation + o.height - 20 > minz }
                     if storey_index.nil?
                         if su_project.building.storeys.first.elevation >= minz
                             storey_data = ThSUBuildingStoreyData.new
@@ -119,7 +119,7 @@ module Examples
                             storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
                             storey_data.buildings.push su_component_data
                             su_project.building.storeys.insert(0, storey_data)
-                        elsif su_project.building.storeys.last.elevation + su_project.building.storeys.last.height - 200 <= minz
+                        elsif su_project.building.storeys.last.elevation + su_project.building.storeys.last.height - 20 <= minz
                             storey_data = ThSUBuildingStoreyData.new
                             storey_data.root = ThTCHRootData.new
                             storey_data.number = su_project.building.storeys.last.number + 1
