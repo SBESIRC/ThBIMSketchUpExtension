@@ -30,8 +30,9 @@ module Examples
               descending_face.reverse! if descending_face.normal.z > 0 ; # flip face to up if facing down
               descending_face.pushpull((descending.descending_height + 2).mm)
               subtract_group = descending_group.subtract(slab_group)
-              if !subtract_group.nil?
-                # entities.erase_entities slab_group
+              if subtract_group.nil?
+                entities.erase_entities descending_group
+              else
                 slab_group = subtract_group
               end
           else
@@ -40,7 +41,12 @@ module Examples
               slab_hole_face = create_slab_hole_face(slab_hole_group, descending)
               slab_hole_face.reverse! if slab_hole_face.normal.z > 0 ; # flip face to up if facing down
               slab_hole_face.pushpull((slab_build_element.height + 2).mm)
-              slab_group = slab_hole_group.subtract(slab_group)
+              subtract_hole_group = slab_hole_group.subtract(slab_group)
+              if subtract_hole_group.nil?
+                entities.erase_entities slab_hole_group
+              else
+                slab_group = subtract_hole_group
+              end
           end
       }
       slab_group.definition.add_classification("IFC 2x3", "IfcSlab")

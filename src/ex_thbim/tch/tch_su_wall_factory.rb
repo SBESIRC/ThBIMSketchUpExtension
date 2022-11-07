@@ -22,7 +22,13 @@ module Examples
         door_hole_face.reverse! if door_hole_face.normal.z < 0 ; # flip face to up if facing down
         door_hole_face.pushpull(door_build_element.height.mm)
         # 把墙挖洞
-        wall_group = door_hole_group.subtract(wall_group)
+        subtract_door_group = door_hole_group.subtract(wall_group)
+        if subtract_door_group.nil?
+          entities.erase_entities door_hole_group
+        else
+          wall_group = subtract_door_group
+        end
+        
 
         door_group = entities.add_group
         door_face = create_opening_face(door_group, door_build_element)
@@ -46,7 +52,12 @@ module Examples
         window_hole_face.reverse! if window_hole_face.normal.z < 0 ; # flip face to up if facing down
         window_hole_face.pushpull(window_build_element.height.mm)
         # 把墙挖洞
-        wall_group = window_hole_group.subtract(wall_group)
+        subtract_window_group = window_hole_group.subtract(wall_group)
+        if subtract_window_group.nil?
+          entities.erase_entities window_hole_group
+        else
+          wall_group = subtract_window_group
+        end
 
         window_group = entities.add_group
         window_face = create_opening_face(window_group, window_build_element)
