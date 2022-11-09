@@ -13,7 +13,7 @@ module Examples
               # do not
             else
               # 数据需刷新
-              if @@model_cache.site.nil? or @@model_cache.site.root.globalId != data.site.root.globalId
+              if @@model_cache.sites.first.nil? or @@model_cache.sites.first.root.globalId != data.sites.first.root.globalId
                 # 缓存为空，说明是新数据,全刷新
                 self.full_refresh(data)
               else
@@ -38,7 +38,7 @@ module Examples
 
         # 全刷新
         def self.full_refresh(data)
-          project_site = data.site
+          project_site = data.sites.first
           project_site_buildings = project_site.buildings
           # 暂时先假定只有一个building，等后续多建筑后再去扩展
           building = project_site_buildings.first
@@ -51,7 +51,7 @@ module Examples
 
         # 增量更新
         def self.incremental_update(data)
-          project_site = data.site
+          project_site = data.sites.first
           project_site_buildings = project_site.buildings
           # 暂时先假定只有一个building，等后续多建筑后再去扩展
           building = project_site_buildings.first

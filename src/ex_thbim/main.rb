@@ -5,8 +5,7 @@ $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 require 'sketchup.rb'
 require 'json'
 require 'google/protobuf'
-require_relative 'data/ThTCHProjectData_pb'
-require_relative 'data/ThSUProjectData_pb'
+require_relative 'data/ProtobufMessage_pb'
 require_relative 'tch/tch_su_project_builder'
 require_relative 'tch/protobuf_extension'
 require_relative 'win32/pipe'
@@ -22,12 +21,14 @@ module Examples
         begin
           Pipe::Client.new('THCAD2SUPIPE') do |pipe|
             pipe_data = pipe.readCadPipeData
-            pipe_data_head = pipe_data[0,10]
-            if pipe_data_head.getbyte(0) == 84 and pipe_data_head.getbyte(1) == 72 and pipe_data_head.getbyte(2) == 1 and pipe_data_head.getbyte(3) == 1
-              pipe_data_body = pipe_data[10..pipe_data.length]
-              model = ThTCHProjectData.decode(pipe_data_body)
-              ThTCH2SUProjectBuilder.Building(model)
-            end
+            message = ProtobufMessage.decode(pipe_data)
+            message_majer = message.header.major
+            message.cad_projects.each{ |project|
+              ThTCH2SUProjectBuilder.Building(project)
+            }
+            message.su_projects.each{ |project|
+              # do not
+            }
           end
         rescue => e
           e.message
@@ -48,6 +49,7 @@ module Examples
       su_project.root.name = "空项目"
       su_project.root.globalId = "su_test_pipe_data"
       su_project.is_face_mesh = false
+      su_project.project_path = Sketchup.active_model.path
       building_data = ThSUBuildingData.new
       begin
         skpfile = Sketchup.active_model.path
@@ -97,16 +99,18 @@ module Examples
           definition_datas = ThProtoBufExtention.to_proto_definition_data(su_project, ent, ent.transformation, code)
         end
       }
-      su_project
+      message = ProtobufMessage.new
+      message.header = MessageHeader.new
+      message.header.major = ""
+      message.header.source = MessageSourceEnum::SU
+      message.su_projects.push su_project
+      message
     end
 
-    def self.push_to_viewer(su_project)
+    def self.push_to_viewer(message)
       begin
-        encoded_data_body = ThSUProjectData.encode(su_project)
-        # 为文件增加头部标识
+        encoded_data = ProtobufMessage.encode(message)
         Pipe::Client.new('THSU2P3DIPE') do |pipe|
-          encoded_data_head = [84, 72, 1, 2, 0, 0, 0, 0, 0, 0]
-          encoded_data = encoded_data_head.pack('C*') + encoded_data_body
           pipe.writeCadPipeData(encoded_data)
         end
         file = Sketchup.active_model.path
@@ -114,8 +118,6 @@ module Examples
           file_path = File.dirname(file)
           file_basename = File.basename(file, ".*")
           filename = File.join(file_path, file_basename + ".thbim")
-          encoded_data_head = [84, 72, 3, 2, 0, 0, 0, 0, 0, 0]
-          encoded_data = encoded_data_head.pack('C*') + encoded_data_body
           outfile = File.new(filename, 'wb')
           outfile.write(encoded_data)
           outfile.close
@@ -153,8 +155,8 @@ module Examples
 
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
-            su_project = self.get_su_build_info
-            self.push_to_viewer(su_project)
+            message = self.get_su_build_info
+            self.push_to_viewer(message)
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"

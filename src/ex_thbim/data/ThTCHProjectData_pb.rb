@@ -10,7 +10,10 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThTCHProjectData.proto", :syntax => :proto3) do
     add_message "ThTCHProjectData" do
       optional :root, :message, 1, "ThTCHRootData"
-      optional :site, :message, 2, "ThTCHSiteData"
+      repeated :sites, :message, 2, "ThTCHSiteData"
+      optional :project_id, :string, 3
+      optional :project_child_id, :string, 4
+      optional :project_path, :string, 5
     end
   end
 end

@@ -14,6 +14,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       repeated :definitions, :message, 2, "ThSUCompDefinitionData"
       optional :building, :message, 3, "ThSUBuildingData"
       optional :is_face_mesh, :bool, 4
+      optional :project_path, :string, 5
     end
   end
 end
