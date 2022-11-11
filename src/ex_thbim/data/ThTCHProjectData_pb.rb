@@ -12,8 +12,9 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :root, :message, 1, "ThTCHRootData"
       repeated :sites, :message, 2, "ThTCHSiteData"
       optional :project_id, :string, 3
-      optional :project_child_id, :string, 4
+      optional :project_sub_id, :string, 4
       optional :project_path, :string, 5
+      optional :binding_name, :string, 6
     end
   end
 end
