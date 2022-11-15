@@ -1,5 +1,8 @@
+require_relative 'pipe.rb'
+require_relative 'Win32API.rb'
+
 # The Win32 module serves as a namespace only
-module Win32
+module Examples
 
   # The Pipe::Client class encapsulates the client side of a named pipe
   # connection.
@@ -29,9 +32,8 @@ module Win32
     #
     def initialize(name, pipe_mode = DEFAULT_PIPE_MODE, open_mode = DEFAULT_OPEN_MODE, pipe_buffer_size = DEFAULT_PIPE_BUFFER_SIZE)
       super(name, pipe_mode, open_mode, pipe_buffer_size)
-
-      @pipe = CreateFile(
-        @name,
+      @pipe = Kernel32.CreateFileW(
+        @name.encode("UTF-16LE"),
         GENERIC_READ | GENERIC_WRITE,
         FILE_SHARE_READ | FILE_SHARE_WRITE,
         nil,
@@ -40,16 +42,14 @@ module Win32
         0
       )
 
-      error = FFI.errno
-
-      if error == ERROR_PIPE_BUSY
-        unless WaitNamedPipe(@name, NMPWAIT_WAIT_FOREVER)
-          raise SystemCallError.new("WaitNamedPipe", error)
-        end
+      if @pipe.to_i == INVALID_HANDLE_VALUE
+        raise SystemCallError.new("CreateFile", Kernel32.GetLastError())
       end
 
-      if @pipe == INVALID_HANDLE_VALUE
-        raise SystemCallError.new("CreateFile", error)
+      if (Kernel32.GetLastError() == ERROR_PIPE_BUSY)
+        unless Kernel32.WaitNamedPipeW(@name.encode("UTF-16LE"), NMPWAIT_USE_DEFAULT_WAIT)
+          raise SystemCallError.new("WaitNamedPipe", Kernel32.GetLastError())
+        end
       end
 
       if block_given?
@@ -61,5 +61,6 @@ module Win32
         end
       end
     end
+
   end
 end
