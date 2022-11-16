@@ -23,6 +23,14 @@ module Examples
       Geom::Transformation.new(arr)
     end
 
+    def to_su_pts(lp)
+      loop_array = []
+      lp.points.each{ |pt|
+        loop_array.push to_su_point3d(pt)
+      }
+      loop_array
+    end
+
     def to_su_face(group, polyline)
       edges = []
       points = polyline.points

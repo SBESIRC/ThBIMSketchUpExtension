@@ -1,18 +1,19 @@
 require 'sketchup.rb'
 require_relative 'tch_su_wall_factory.rb'
 require_relative 'tch_su_slab_factory.rb'
+require_relative 'tch_su_element_factory.rb'
 require_relative 'tch_su_railing_factory.rb'
 
 module Examples
   module HelloCube
-    class ThTCH2SUStoreyFactory
+    class ThTCHStoreyFactory
       def self.ParseFloor(model, storey, material_dic)
         if storey.is_a?(ThTCHBuildingStoreyData)
-          list = model.definitions
+          def_def_list = model.definitions
           story_description = storey.build_element.root.description
-          comp_def = list[story_description]
+          comp_def = def_list[story_description]
           if comp_def.nil?
-            comp_def = list.add story_description
+            comp_def = def_list.add story_description
             # comp_def.description = storey.root.name
             entities = comp_def.entities
             begin
@@ -99,11 +100,11 @@ module Examples
 
       def self.full_refresh_floor(model, globalid, storey, material_dic)
         if storey.is_a?(ThTCHBuildingStoreyData)
-          list = model.definitions
+          def_def_list = model.definitions
           story_description = globalid + storey.build_element.root.description
-          comp_def = list[story_description]
+          comp_def = def_list[story_description]
           if comp_def.nil?
-            comp_def = list.add story_description
+            comp_def = def_list.add story_description
             # comp_def.description = storey.root.name
             entities = comp_def.entities
             begin
@@ -141,12 +142,12 @@ module Examples
 
       def self.incremental_update_floor(model, globalid, storey, cache_storey, material_dic)
         if storey.is_a?(ThTCHBuildingStoreyData) and storey.memory_storey_id.length == 0
-          list = model.definitions
+          def_def_list = model.definitions
           story_description = globalid + storey.build_element.root.description
-          comp_def = list[story_description]
+          comp_def = def_list[story_description]
           entities = comp_def.entities
           if comp_def.nil?
-            comp_def = list.add story_description
+            comp_def = def_list.add story_description
             # comp_def.description = storey.root.name
             begin
               # Wall
@@ -268,6 +269,37 @@ module Examples
             ent.erase!
           end
         }
+      end
+    end
+
+    class ThSUStoreyFactory
+      def self.full_refresh_floor(definitions, storey)
+        begin
+          if storey.is_a?(ThSUBuildingStoreyData)
+            def_list = Sketchup.active_model.definitions
+            story_description = storey.root.globalId
+            if true
+              comp_def = def_list.add story_description
+              entities = comp_def.entities
+                # elements
+                buildings = storey.buildings
+                buildings.each{ |element|
+                  ThTCH2SUELEMENTFACTORY.to_su_element(entities, definitions[element.component.definition_index], element.component.transformations)
+                }
+            end
+            # a transformation that does nothing to just get the job done.
+            #trans = Geom::Transformation.new(ThTCH2SUGeomUtil.to_su_point3d(storey.origin)) # an empty, default transformation.
+            transform = Geom::Transformation.new
+            # Now, insert the Cube component.
+            instance = Sketchup.active_model.active_entities.add_instance(comp_def, trans)
+            # instance.name = storey.build_element.root.name
+            instance.locked = true
+          else
+            result = false
+          end
+        rescue => e
+          e.message
+        end
       end
     end
   end # module HelloCube
