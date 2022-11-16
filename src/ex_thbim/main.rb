@@ -14,8 +14,6 @@ module Examples
   module HelloCube
     @PipeTimerID = 0
     @PipeTimerFlag = false
-    @FileTimerID = 0
-    @FileTimerFlag = false
 
     def self.StartWin32PipeMonitor
       @PipeTimerID = UI.start_timer(2, true){
