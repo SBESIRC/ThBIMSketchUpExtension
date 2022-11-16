@@ -12,33 +12,65 @@ require_relative 'utility/client.rb'
 
 module Examples
   module HelloCube
-    @TimerID = 0
-    @TimerFlag = false
+    @PipeTimerID = 0
+    @PipeTimerFlag = false
+    @FileTimerID = 0
+    @FileTimerFlag = false
 
     def self.StartWin32PipeMonitor
-      @TimerID = UI.start_timer(2, true){
+      @PipeTimerID = UI.start_timer(2, true){
         begin
           Pipe::Client.new('THCAD2SUPIPE') do |pipe|
             pipe.read()
             message = ProtobufMessage.decode(pipe.buffer)
             message_majer = message.header.major
             message.cad_projects.each{ |project|
-              ThTCH2SUProjectBuilder.Building(project)
+              ThTCHProjectBuilder.building_project(project)
             }
             message.su_projects.each{ |project|
-              # do not
+              ThSUProjectBuilder.building_project(project)
             }
           end
         rescue => e
           e.message
         end
       }
-      @TimerFlag = true
+      @PipeTimerFlag = true
     end
 
     def self.CloseWin32PipeMonitor
-      UI.stop_timer(@TimerID)
-      @TimerFlag = false
+      UI.stop_timer(@PipeTimerID)
+      @PipeTimerFlag = false
+    end
+
+    def self.StartLoadIFC
+      @FileTimerID = UI.start_timer(4, true){
+        begin
+          skpfile = Sketchup.active_model.path
+          if skpfile.length > 0
+            basename = File.basename(skpfile, ".*")
+            file_path = File.dirname(skpfile)
+            if File.directory? file_path
+              Dir.entries(file_path, encoding:'UTF-8').each{ |file_name|
+                if file_name.include? "temp.ifc"
+                  file_full_path = File::join(file_path, file_name)
+                  status = Sketchup.active_model.import(file_full_path, false)
+                  File.delete(file_full_path)
+                  break
+                end
+              }
+            end
+          end
+        rescue => e
+          e.message
+        end
+      }
+      @FileTimerFlag = true
+    end
+
+    def self.CloseLoadIFC
+      UI.stop_timer(@FileTimerID)
+      @FileTimerFlag = false
     end
 
     # 获取SU构建信息并发送至Viewer
@@ -134,7 +166,7 @@ module Examples
         if toolbar.length < 1
           # Command1
           command_tool1 = UI::Command.new("开启CAD监听") {           # 创建一个工具名为Test的命令
-              if(@TimerFlag == false)
+              if(@PipeTimerFlag == false)
                 self.StartWin32PipeMonitor
               else
                 self.CloseWin32PipeMonitor
@@ -143,7 +175,7 @@ module Examples
           command_tool1.small_icon = "Img/ToCAD.png"             # 工具在工具条上显示的图标
           command_tool1.large_icon = "Img/ToCAD.png"
           command_tool1.set_validation_proc {
-            if @TimerFlag
+            if @PipeTimerFlag
               MF_CHECKED
             else
               MF_UNCHECKED
@@ -162,10 +194,32 @@ module Examples
           command_tool2.tooltip = "Push To Viewer"                      # 对该工具的一些说明
           command_tool2.status_bar_text = "推送至 Viewer" # 在状态栏中显示的内容
 
+          # Command3
+          command_tool3 = UI::Command.new("打开文件监听") {           # 创建一个工具名为Test的命令
+            if(@FileTimerFlag == false)
+              self.StartLoadIFC
+            else
+              self.CloseLoadIFC
+            end
+          }
+          command_tool3.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
+          command_tool3.large_icon = "Img/ToViewer.png"
+          command_tool3.set_validation_proc {
+            if @FileTimerFlag
+              MF_CHECKED
+            else
+              MF_UNCHECKED
+            end
+          }
+          command_tool3.tooltip = "Turn on File monitoring"                      # 对该工具的一些说明
+          command_tool3.status_bar_text = "打开文件监听" # 在状态栏中显示的内容
 
-          toolbar = toolbar.add_item command_tool1                     # 将这个命名添加到工具条上
+
+          toolbar = toolbar.add_item command_tool1                     # 将Tool1添加到工具条上
           toolbar = toolbar.add_separator                              # 添加分隔符
-          toolbar = toolbar.add_item command_tool2                     # 将这个命名添加到工具条上
+          toolbar = toolbar.add_item command_tool2                     # 将Tool2添加到工具条上
+          # toolbar = toolbar.add_separator                              # 添加分隔符
+          # toolbar = toolbar.add_item command_tool3                     # 将Tool3添加到工具条上
         end
         toolbar.show                                       # 在SktchUp中显示该工具条
       end

@@ -3,10 +3,10 @@ require_relative 'tch_su_storey_factory.rb'
 
 module Examples
   module HelloCube
-    class ThTCH2SUProjectBuilder
+    class ThTCHProjectBuilder
         @@model_cache = ThTCHProjectData.new;
         @@material_dic = Hash.new
-        def self.Building(data)
+        def self.building_project(data)
           if data.is_a?(ThTCHProjectData)
             self.check_material
             if data == @@model_cache
@@ -45,7 +45,7 @@ module Examples
           building.storeys.each{ |storey|
             # 后期在这里做逻辑
             # 创建geometry
-            ThTCH2SUStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
+            ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
           }
         end
 
@@ -62,14 +62,31 @@ module Examples
             if !cache_storeys.nil? and cache_storeys.length == 1
               cache_storey = cache_storeys.first
               if cache_storey != storey
-                ThTCH2SUStoreyFactory.incremental_update_floor(Sketchup.active_model, data.root.globalId, storey, cache_storey, @@material_dic)
+                ThTCHStoreyFactory.incremental_update_floor(Sketchup.active_model, data.root.globalId, storey, cache_storey, @@material_dic)
               end
             else
-              ThTCH2SUStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
+              ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
             end
             
           }
         end
+    end
+
+    class ThSUProjectBuilder
+      def self.building_project(data)
+        if data.is_a?(ThSUProjectData)
+          ThTCHProjectBuilder.check_material
+          self.full_refresh(data)
+        end
+      end
+
+      # 全刷新
+      def self.full_refresh(data)
+        definitions = data.definitions
+        data.building.storeys.each{ |storey|
+          ThSUStoreyFactory.full_refresh_floor(definitions, storey)
+        }
+      end
     end
   end # module HelloCube
 end # module Examples
