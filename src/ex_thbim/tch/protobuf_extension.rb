@@ -73,6 +73,7 @@ module Examples
             if definition.name != "Laura" and !definition.name.include?("ThDefinition")
                 su_definition_index = su_project.definitions.index{ |d| d.definition_name == definition.name}
                 minz = 1.0e8
+                maxz = -1.0e8
                 definition.entities.each{ |e|
                     if e.is_a?(Sketchup::Face)
                         if su_definition_index.nil?
@@ -86,7 +87,9 @@ module Examples
                             }
                             su_component_definition.brep_faces.push su_face_data
                         end
-                        minz = [minz, (tr * e.bounds.center).z.to_mm].min
+                        centerpt_z = (tr * e.bounds.center).z.to_mm
+                        minz = [minz, centerpt_z].min
+                        maxz = [maxz, centerpt_z].max
                     elsif e.is_a?(Sketchup::Group) or e.is_a?(Sketchup::ComponentInstance)
                         to_proto_definition_data(su_project, e, tr * e.transformation, get_hash_code(hashcode, e.entityID))
                     end
@@ -101,37 +104,52 @@ module Examples
                     if !ifc_type.nil?
                         su_component_data.component.ifc_classification = ifc_type
                     end
-                    storey_index = su_project.building.storeys.index{ |o| o.elevation - 20 < minz and o.elevation + o.height - 20 > minz }
-                    if storey_index.nil?
-                        if su_project.building.storeys.first.elevation >= minz
-                            storey_data = ThSUBuildingStoreyData.new
-                            storey_data.root = ThTCHRootData.new
-                            storey_data.number = su_project.building.storeys.first.number - 1
-                            storey_data.elevation = su_project.building.storeys.first.elevation - 1.0e10
-                            storey_data.height = 1.0e10
-                            storey_data.stdFlr_no = su_project.building.storeys.first.stdFlr_no - 1
-                            if storey_data.number == 0
-                                storey_data.number = -1
-                            end
-                            if storey_data.stdFlr_no == 0
-                                storey_data.stdFlr_no = -1
-                            end
-                            storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
-                            storey_data.buildings.push su_component_data
-                            su_project.building.storeys.insert(0, storey_data)
-                        elsif su_project.building.storeys.last.elevation + su_project.building.storeys.last.height - 20 <= minz
-                            storey_data = ThSUBuildingStoreyData.new
-                            storey_data.root = ThTCHRootData.new
-                            storey_data.number = su_project.building.storeys.last.number + 1
-                            storey_data.elevation = su_project.building.storeys.last.elevation + su_project.building.storeys.last.height
-                            storey_data.height = 1.0e10
-                            storey_data.stdFlr_no = su_project.building.storeys.last.stdFlr_no + 1
-                            storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
-                            storey_data.buildings.push su_component_data
-                            su_project.building.storeys.push storey_data
-                        end
+
+                    if su_project.building.storeys.length == 1 and su_project.building.storeys.first.stdFlr_no == -100
+                        first_storey = su_project.building.storeys.first
+                        first_storey.buildings.push su_component_data
+                        first_storey.elevation = [first_storey.elevation, minz].min
+                        first_storey.height = [first_storey.height, maxz - first_storey.elevation].max
                     else
-                        su_project.building.storeys[storey_index].buildings.push su_component_data
+                        storey_index = su_project.building.storeys.rindex{ |o| minz > o.elevation - 20}
+                        if storey_index.nil?
+                            first_storey = su_project.building.storeys.first
+                            if first_storey.stdFlr_no == -100
+                                first_storey.buildings.push su_component_data
+                                first_storey.elevation = [first_storey.elevation, minz].min
+                            else
+                                storey_data = ThSUBuildingStoreyData.new
+                                storey_data.root = ThTCHRootData.new
+                                storey_data.number = su_project.building.storeys.first.number - 1
+                                storey_data.elevation = minz
+                                storey_data.height = 0
+                                storey_data.stdFlr_no = -100
+                                if storey_data.number == 0
+                                    storey_data.number = -1
+                                end
+                                storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
+                                storey_data.buildings.push su_component_data
+                                su_project.building.storeys.insert(0, storey_data)
+                            end
+                        else
+                            storey = su_project.building.storeys[storey_index]
+                            if storey.stdFlr_no == -100
+                                storey.buildings.push su_component_data
+                                storey.height = [storey.height, maxz - storey.elevation].max
+                            elsif storey.elevation + storey.height - 20 < minz
+                                storey_data = ThSUBuildingStoreyData.new
+                                storey_data.root = ThTCHRootData.new
+                                storey_data.number = su_project.building.storeys.last.number + 1
+                                storey_data.elevation = storey.elevation + storey.height
+                                storey_data.height = maxz - storey_data.elevation
+                                storey_data.stdFlr_no = -100
+                                storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
+                                storey_data.buildings.push su_component_data
+                                su_project.building.storeys.push storey_data
+                            else
+                                storey.buildings.push su_component_data
+                            end
+                        end
                     end
                 end
             end
@@ -150,20 +168,40 @@ module Examples
             su_component_data.component = ThSUComponentData.new
             su_component_data.component.transformations = ThProtoBufExtention.to_proto_transformation(tr)
             su_component_data.component.definition_index = su_component_definition_index
-            ent_name = ent.name
-            if !ent_name.nil?
-                su_component_data.component.instance_name = ent_name
-            end
             if !(ent_layer = ent.layer).nil?
                 case ent_layer.name
                 when "S_BEAM"
                     su_component_data.component.ifc_classification = "IfcBeam"
+                    ent_name = ent.name
+                    if !ent_name.nil?
+                        su_component_data.component.instance_name = ent_name
+                    end
                 when "S_COLU"
                     su_component_data.component.ifc_classification = "IfcColumn"
                 when "S_FLOOR", "S_SLAB"
                     su_component_data.component.ifc_classification = "IfcSlab"
                 when "S_WALL"
                     su_component_data.component.ifc_classification = "IfcWall"
+                when "S_CONS_构造柱"
+                    su_component_data.component.ifc_classification = "IfcColumn"
+                    su_component_data.component.instance_name = "S_CONS_构造柱"
+                when "S_CONS_通高墙"
+                    su_component_data.component.ifc_classification = "IfcWall"
+                    su_component_data.component.instance_name = "S_CONS_通高墙"
+                when "S_CONS_窗台墙"
+                    su_component_data.component.ifc_classification = "IfcWall"
+                    su_component_data.component.instance_name = "S_CONS_窗台墙"
+                when "S_COLU_梯柱"
+                    su_component_data.component.ifc_classification = "IfcColumn"
+                    su_component_data.component.instance_name = "S_COLU_梯柱"
+                when "S_BEAM_梯梁"
+                    su_component_data.component.ifc_classification = "IfcBeam"
+                    ent_name = ent.name
+                    if !ent_name.nil?
+                        su_component_data.component.instance_name = ent_name + ";S_BEAM_梯梁"
+                    else
+                        su_component_data.component.instance_name = "S_BEAM_梯梁"
+                    end
                 end
             end
             su_component_data

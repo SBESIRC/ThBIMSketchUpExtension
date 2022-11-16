@@ -86,7 +86,7 @@ module Examples
         skpfile = Sketchup.active_model.path
         if skpfile.length > 0
           su_project.root.name = File.basename(skpfile, ".*")
-          file_path = File.dirname(skpfile)
+          file_path = File.expand_path('../../YDB/',skpfile)
           if File.directory? file_path
             Dir.entries(file_path, encoding:'UTF-8').each{ |file_name|
               if file_name.include? ".ifc.json"
@@ -119,7 +119,7 @@ module Examples
         storey_data.number = 1 #虚拟楼层
         storey_data.elevation = -1.0e10
         storey_data.height = 2.0e10
-        storey_data.stdFlr_no = 1
+        storey_data.stdFlr_no = -100
         building_data.storeys.push storey_data
       end
       su_project.building = building_data
@@ -130,6 +130,23 @@ module Examples
           definition_datas = ThProtoBufExtention.to_proto_definition_data(su_project, ent, ent.transformation, code)
         end
       }
+      if su_project.building.storeys.length == 1 and su_project.building.storeys.first.stdFlr_no == -100
+        su_project.building.storeys.first.stdFlr_no = 1
+      else
+        first_storey = su_project.building.storeys.first
+        last_storey = su_project.building.storeys.last
+        if first_storey.stdFlr_no == -100
+          first_storey.stdFlr_no = su_project.building.storeys[1].stdFlr_no - 1
+          first_storey.height = su_project.building.storeys[1].element - first_storey.element
+          if first_storey.stdFlr_no == 0
+            first_storey.stdFlr_no = -1
+          end
+        end
+        if last_storey.stdFlr_no == -100
+          last_storey.stdFlr_no = su_project.building.storeys[su_project.building.storeys.length - 2].stdFlr_no + 1
+        end
+      end
+
       message = ProtobufMessage.new
       message.header = MessageHeader.new
       message.header.major = ""
