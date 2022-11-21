@@ -105,7 +105,7 @@ module Examples
         last_storey = su_project.building.storeys.last
         if first_storey.stdFlr_no == -100
           first_storey.stdFlr_no = su_project.building.storeys[1].stdFlr_no - 1
-          first_storey.height = su_project.building.storeys[1].element - first_storey.element
+          first_storey.height = su_project.building.storeys[1].elevation - first_storey.elevation
           if first_storey.stdFlr_no == 0
             first_storey.stdFlr_no = -1
           end
