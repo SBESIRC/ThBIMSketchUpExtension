@@ -2,6 +2,7 @@
 # Licensed under the MIT license
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/vendor")
 require 'sketchup.rb'
 require 'json'
 require 'google/protobuf'
