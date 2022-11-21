@@ -1,12 +1,19 @@
-require_relative 'Win32API.rb'
+require File.join(File.dirname(__FILE__), 'pipe', 'windows', 'constants')
+require File.join(File.dirname(__FILE__), 'pipe', 'windows', 'functions')
+require File.join(File.dirname(__FILE__), 'pipe', 'windows', 'structs')
 
-module Examples
-
+# The Win32 module serves as a namespace only.
+module Win32
+  # The Pipe class is an abstract base class for the Pipe::Server and
+  # Pipe::Client classes. Do not use this directly.
+  #
   class Pipe
-    include Win32API
+    include Windows::Constants
+    include Windows::Functions
+    include Windows::Structs
 
     # Error raised when anything other than a SystemCallError occurs.
-    class PipeError < StandardError; end
+    class Error < StandardError; end
 
     # The version of this library
     VERSION = '0.4.0'
@@ -92,7 +99,7 @@ module Examples
       @pipe         = nil
       @pending_io   = false
       @buffer       = ''
-      @ffi_buffer   = Fiddle::Pointer.malloc(pipe_buffer_size)
+      @ffi_buffer   = FFI::Buffer.new( pipe_buffer_size )
       @size         = 0
       @overlapped   = nil
       @transferred  = 0
@@ -112,13 +119,13 @@ module Examples
 
     # Disconnects the pipe.
     def disconnect
-      Kernel32.DisconnectNamedPipe(@pipe) if @pipe
+      DisconnectNamedPipe(@pipe) if @pipe
     end
 
     # Closes the pipe.
     #
     def close
-      Kernel32.CloseHandle(@pipe) if @pipe
+      CloseHandle(@pipe) if @pipe
     end
 
     # Returns whether or not there is a pending IO operation on the pipe.
@@ -137,8 +144,9 @@ module Examples
     # pipe.
     #
     def read(read_size = @ffi_buffer.size)
-      bytes = Fiddle::Pointer.malloc(4) # DWORD
-      raise PipeError, "no pipe created" unless @pipe
+      bytes = FFI::MemoryPointer.new(:ulong)
+
+      raise Error, "no pipe created" unless @pipe
 
       if @asynchronous
         bool = ReadFile(@pipe, @ffi_buffer, read_size, bytes, @overlapped)
@@ -158,27 +166,34 @@ module Examples
 
         return false
       else
-        begin
-          loop do
-            fSuccess = Kernel32.ReadFile(@pipe, @ffi_buffer, read_size, bytes, nil)
-            break unless fSuccess
-            cbRead = bytes[0, 4].unpack("L*").first
-            break unless cbRead > 0
-            @buffer += @ffi_buffer.to_s(cbRead)
-          end
-          return true
-        rescue => e
-          return false
+        unless ReadFile(@pipe, @ffi_buffer, read_size, bytes, nil)
+          raise SystemCallError.new("ReadFile", FFI.errno)
         end
+        @buffer = @ffi_buffer.get_string(0, bytes.read_ulong)
       end
+    end
+
+    # Reads data from the pipe. You can read data from either end of a named
+    # pipe.
+    #
+    def readCadPipeData(read_size = @ffi_buffer.size)
+      bytes = FFI::MemoryPointer.new(:ulong)
+      raise Error, "no pipe created" unless @pipe
+      result = ''
+      while ReadFile(@pipe, @ffi_buffer, read_size, bytes, nil)
+        value = @ffi_buffer.get_bytes(0, bytes.read_ulong)
+        result += value
+      end
+      result
     end
 
     # Writes 'data' to the pipe. You can write data to either end of a
     # named pipe.
     #
     def write(data)
-      bytes = Fiddle::Pointer.malloc(4) # DWORD
-      raise PipeError, "no pipe created" unless @pipe
+      bytes = FFI::MemoryPointer.new(:ulong)
+
+      raise Error, "no pipe created" unless @pipe
 
       if @asynchronous
         bool = WriteFile(@pipe, data, data.size, bytes, @overlapped)
@@ -197,12 +212,25 @@ module Examples
 
         return false
       else
-        begin
-          Kernel32.WriteFile(@pipe, data, data.size, bytes, nil)
-        rescue => e
-          return false
+        unless WriteFile(@pipe, data, data.size, bytes, nil)
+          raise SystemCallError.new("WriteFile", FFI.errno)
         end
+
+        return true
       end
+    end
+
+    # Writes 'data' to the pipe. You can write data to either end of a
+    # named pipe.
+    #
+    def writeCadPipeData(data)
+      bytes = FFI::MemoryPointer.new(:ulong)
+      raise Error, "no pipe created" unless @pipe
+      unless WriteFile(@pipe, data, data.size, bytes, nil)
+        #raise SystemCallError.new("WriteFile", FFI.errno)
+        return false
+      end
+      return true
     end
 
     # Returns the pipe object if an event (such as a client connection)
@@ -211,7 +239,7 @@ module Examples
     #
     def wait(max_time = nil)
       unless @asynchronous
-        raise PipeError, 'cannot wait in synchronous (blocking) mode'
+        raise Error, 'cannot wait in synchronous (blocking) mode'
       end
 
       max_time = max_time ? max_time * 1000 : INFINITE
@@ -243,7 +271,7 @@ module Examples
 
     alias length size
   end
-
 end
 
-
+require File.join(File.dirname(__FILE__), 'pipe', 'server')
+require File.join(File.dirname(__FILE__), 'pipe', 'client')
