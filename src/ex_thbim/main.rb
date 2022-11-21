@@ -8,8 +8,7 @@ require 'google/protobuf'
 require_relative 'data/ProtobufMessage_pb'
 require_relative 'tch/tch_su_project_builder'
 require_relative 'tch/protobuf_extension'
-require_relative 'win32/pipe'
-include Win32
+require_relative 'utility/client.rb'
 
 module Examples
   module HelloCube
@@ -20,8 +19,8 @@ module Examples
       @PipeTimerID = UI.start_timer(2, true){
         begin
           Pipe::Client.new('THCAD2SUPIPE') do |pipe|
-            pipe_data = pipe.readCadPipeData
-            message = ProtobufMessage.decode(pipe_data)
+            pipe.read()
+            message = ProtobufMessage.decode(pipe.buffer)
             message_majer = message.header.major
             message.cad_projects.each{ |project|
               ThTCHProjectBuilder.building_project(project)
@@ -128,7 +127,7 @@ module Examples
       begin
         encoded_data = ProtobufMessage.encode(message)
         Pipe::Client.new('THSU2P3DIPE') do |pipe|
-          pipe.writeCadPipeData(encoded_data)
+          pipe.write(encoded_data)
         end
         file = Sketchup.active_model.path
         if file.length > 0
