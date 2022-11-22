@@ -289,7 +289,7 @@ module Examples
             end
             # a transformation that does nothing to just get the job done.
             #trans = Geom::Transformation.new(ThTCH2SUGeomUtil.to_su_point3d(storey.origin)) # an empty, default transformation.
-            transform = Geom::Transformation.new
+            trans = Geom::Transformation.new
             # Now, insert the Cube component.
             instance = Sketchup.active_model.active_entities.add_instance(comp_def, trans)
             # instance.name = storey.build_element.root.name

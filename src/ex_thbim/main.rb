@@ -42,6 +42,83 @@ module Examples
       @PipeTimerFlag = false
     end
 
+    def self.create_grid(rows = 5, columns = 5)
+      # mesh = self.generate_grid_mesh(rows, columns)
+      # model = Sketchup.active_model
+      # model.start_operation('Grid', true)
+      # group = model.active_entities.add_group
+      # # group.entities.fill_from_mesh(mesh, true, Geom::PolygonMesh::AUTO_SOFTEN)
+      # # group.entities.fill_from_mesh(mesh, true, Geom::PolygonMesh::HIDE_BASED_ON_INDEX)
+      # group.entities.fill_from_mesh(mesh, true, Geom::PolygonMesh::SOFTEN_BASED_ON_INDEX)
+      # #group.entities.fill_from_mesh(mesh, true, Geom::PolygonMesh::SMOOTH_SOFT_EDGES)
+      # model.commit_operation
+      Sketchup.active_model.entities.grep(Sketchup::Face).each{ |face|
+        l = face.edges.length
+        face.edges.each{ |e|
+          a = e.smooth?
+          b = e.soft?
+          c = e.hidden?
+          d = e.visible?
+        }
+      }
+    end
+
+    def self.generate_grid_mesh(rows, columns)
+      # Compute the number of points and polygons we'll create. This is important
+      # for max performance so PolygonMesh can allocate enough memory up front
+      # and choose appropriate internal algorithm for looking up points.
+      num_polygons = rows * columns
+  
+      row_points = rows + 1
+      col_points = columns + 1
+      num_points = row_points * col_points
+  
+      mesh = Geom::PolygonMesh.new()
+  
+      # To minimize the number of times points are looked up they are added
+      # explicitly before adding any polygons.
+      # As of SketchUp 2021.1 this step is less important, one can pass the points
+      # to mesh.add_polygon instead of the indicies. There is however always a
+      # performance benefit of building the polygons with indicies.
+
+      # mesh.add_point(Geom::Point3d.new(0, 0, 0)) 
+      # mesh.add_point(Geom::Point3d.new(100, 0, 0)) 
+      # mesh.add_point(Geom::Point3d.new(100, 100, 0)) 
+      # mesh.add_point(Geom::Point3d.new(0, 100, 0)) 
+      # mesh.add_point(Geom::Point3d.new(0, 0, 100)) 
+      # mesh.add_point(Geom::Point3d.new(100, 0, 100)) 
+      # mesh.add_point(Geom::Point3d.new(100, 100, 100)) 
+      # mesh.add_point(Geom::Point3d.new(0, 100, 100)) 
+      # mesh.add_polygon([1, 2, 3])
+      # mesh.add_polygon([1, 3, 4])
+      # mesh.add_polygon([1, 2, 6, 5])
+      # mesh.add_polygon([2, 6, 7, 3])
+      # mesh.add_polygon([5, 6, 7, 8])
+      # mesh.add_polygon([8, 7, 3, 4])
+      # mesh.add_polygon([5, 8, 4, 1])
+
+      indicies = []
+      row_points.times { |x|
+        col_points.times { |y|
+          point = Geom::Point3d.new(x * 10, y * 10, 0)
+          indicies << mesh.add_point(point) 
+        }
+      }
+  
+      (0...rows).each { |x|
+        (0...columns).each { |y|
+          i1 = (col_points * y) + x
+          i2 = i1 + 1
+          i3 = i2 + col_points
+          i4 = i3 - 1
+          polygon = [i1, i2, i3, i4].map { |i| indicies[i] }
+          mesh.add_polygon(polygon)
+        }
+      }
+  
+      mesh
+    end
+
     # 获取SU构建信息并发送至Viewer
     def self.get_su_build_info
       su_project = ThSUProjectData.new
@@ -172,6 +249,7 @@ module Examples
 
           # Command2
           command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
+            self.create_grid
             message = self.get_su_build_info
             self.push_to_viewer(message)
           }
