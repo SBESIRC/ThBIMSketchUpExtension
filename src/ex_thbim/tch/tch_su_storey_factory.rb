@@ -9,7 +9,7 @@ module Examples
     class ThTCHStoreyFactory
       def self.ParseFloor(model, storey, material_dic)
         if storey.is_a?(ThTCHBuildingStoreyData)
-          def_def_list = model.definitions
+          def_list = model.definitions
           story_description = storey.build_element.root.description
           comp_def = def_list[story_description]
           if comp_def.nil?
@@ -98,9 +98,9 @@ module Examples
         end
       end
 
-      def self.full_refresh_floor(model, globalid, storey, material_dic)
+      def self.full_refresh_floor(model, globalid, storey)
         if storey.is_a?(ThTCHBuildingStoreyData)
-          def_def_list = model.definitions
+          def_list = model.definitions
           story_description = globalid + storey.build_element.root.description
           comp_def = def_list[story_description]
           if comp_def.nil?
@@ -111,19 +111,19 @@ module Examples
               # Wall
               storey_walls = storey.walls
               storey_walls.each{ |wall|
-                ThTCH2SUWALLFACTORY.to_su_wall(entities, wall, material_dic["wall"], material_dic["door"], material_dic["window"])
+                ThTCH2SUWALLFACTORY.to_su_wall(entities, wall)
               }
 
               # Slab
               storey_slabs = storey.slabs
               storey_slabs.each{ |slab|
-                ThTCH2SUSLABFACTORY.to_su_slab(entities, slab, material_dic["slab"])
+                ThTCH2SUSLABFACTORY.to_su_slab(entities, slab)
               }
 
               # Railing
               storey_railings = storey.railings
               storey_railings.each{ |railing|
-                ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing, material_dic["railing"])
+                ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing)
               }
             rescue => e
               e.message
@@ -140,9 +140,9 @@ module Examples
         end
       end
 
-      def self.incremental_update_floor(model, globalid, storey, cache_storey, material_dic)
+      def self.incremental_update_floor(model, globalid, storey, cache_storey)
         if storey.is_a?(ThTCHBuildingStoreyData) and storey.memory_storey_id.length == 0
-          def_def_list = model.definitions
+          def_list = model.definitions
           story_description = globalid + storey.build_element.root.description
           comp_def = def_list[story_description]
           entities = comp_def.entities
@@ -153,19 +153,19 @@ module Examples
               # Wall
               storey_walls = storey.walls
               storey_walls.each{ |wall|
-                ThTCH2SUWALLFACTORY.to_su_wall(entities, wall, material_dic["wall"], material_dic["door"], material_dic["window"])
+                ThTCH2SUWALLFACTORY.to_su_wall(entities, wall)
               }
 
               # Slab
               storey_slabs = storey.slabs
               storey_slabs.each{ |slab|
-                ThTCH2SUSLABFACTORY.to_su_slab(entities, slab, material_dic["slab"])
+                ThTCH2SUSLABFACTORY.to_su_slab(entities, slab)
               }
 
               # Railing
               storey_railings = storey.railings
               storey_railings.each{ |railing|
-                ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing, material_dic["railing"])
+                ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing)
               }
             rescue => e
               e.message
@@ -196,10 +196,10 @@ module Examples
                     cache_wall.windows.each{ |window|
                       self.delete_group(entities, window.build_element.root.globalId)
                     }
-                    ThTCH2SUWALLFACTORY.to_su_wall(entities, wall, material_dic["wall"], material_dic["door"], material_dic["window"])
+                    ThTCH2SUWALLFACTORY.to_su_wall(entities, wall)
                   end
                 else
-                  ThTCH2SUWALLFACTORY.to_su_wall(entities, wall, material_dic["wall"], material_dic["door"], material_dic["window"])
+                  ThTCH2SUWALLFACTORY.to_su_wall(entities, wall)
                 end
               }
               cache_storey_walls.each{ |wall|
@@ -224,10 +224,10 @@ module Examples
                   cache_storey_slabs.delete cache_slab
                   if cache_slab != slab
                     self.delete_group(entities, cache_slab.build_element.root.globalId)
-                    ThTCH2SUSLABFACTORY.to_su_slab(entities, slab, material_dic["slab"])
+                    ThTCH2SUSLABFACTORY.to_su_slab(entities, slab)
                   end
                 else
-                  ThTCH2SUSLABFACTORY.to_su_slab(entities, slab, material_dic["slab"])
+                  ThTCH2SUSLABFACTORY.to_su_slab(entities, slab)
                 end
               }
               cache_storey_slabs.each{ |slab|
@@ -246,10 +246,10 @@ module Examples
                   cache_railings.delete cache_railing
                   if cache_railing != railing
                     self.delete_group(entities, cache_railing.build_element.root.globalId)
-                    ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing, material_dic["railing"])
+                    ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing)
                   end
                 else
-                  ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing, material_dic["railing"])
+                  ThTCH2SURAILINGFACTORY.to_su_railing(entities, railing)
                 end
               }
               cache_storey_railings.each{ |railing|
@@ -278,15 +278,17 @@ module Examples
           if storey.is_a?(ThSUBuildingStoreyData)
             def_list = Sketchup.active_model.definitions
             story_description = storey.root.globalId
-            if true
-              comp_def = def_list.add story_description
-              entities = comp_def.entities
-                # elements
-                buildings = storey.buildings
-                buildings.each{ |element|
-                  ThTCH2SUELEMENTFACTORY.to_su_element(entities, definitions[element.component.definition_index], element.component.transformations)
-                }
+            comp_def = def_list[story_description]
+            unless comp_def.nil?
+              def_list.remove(comp_def)
             end
+            comp_def = def_list.add story_description
+            entities = comp_def.entities
+            # elements
+            buildings = storey.buildings
+            buildings.each{ |element|
+              ThTCH2SUELEMENTFACTORY.to_su_element(entities, definitions[element.component.definition_index], element)
+            }
             # a transformation that does nothing to just get the job done.
             #trans = Geom::Transformation.new(ThTCH2SUGeomUtil.to_su_point3d(storey.origin)) # an empty, default transformation.
             trans = Geom::Transformation.new

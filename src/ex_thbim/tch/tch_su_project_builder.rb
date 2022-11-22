@@ -3,12 +3,17 @@ require_relative 'tch_su_storey_factory.rb'
 
 module Examples
   module HelloCube
+    $material_door = Sketchup.active_model.materials.load(File.expand_path('../../Material/door.skm', __FILE__))
+    $material_slab = Sketchup.active_model.materials.load(File.expand_path('../../Material/slab.skm', __FILE__))
+    $material_wall = Sketchup.active_model.materials.load(File.expand_path('../../Material/wall.skm', __FILE__))
+    $material_window = Sketchup.active_model.materials.load(File.expand_path('../../Material/window.skm', __FILE__))
+    $material_railing = Sketchup.active_model.materials.load(File.expand_path('../../Material/railing.skm', __FILE__))
+    $material_beam = Sketchup.active_model.materials.load(File.expand_path('../../Material/beam.skm', __FILE__))
+    $material_column = Sketchup.active_model.materials.load(File.expand_path('../../Material/column.skm', __FILE__))
     class ThTCHProjectBuilder
         @@model_cache = ThTCHProjectData.new;
-        @@material_dic = Hash.new
         def self.building_project(data)
           if data.is_a?(ThTCHProjectData)
-            self.check_material
             if data == @@model_cache
               # do not
             else
@@ -25,17 +30,6 @@ module Examples
           end
         end
 
-        def self.check_material
-          if @@material_dic.length < 5
-            materials = Sketchup.active_model.materials
-            @@material_dic["door"] = materials.load(File.expand_path('../../Material/door.skm', __FILE__))
-            @@material_dic["slab"] = materials.load(File.expand_path('../../Material/slab.skm', __FILE__))
-            @@material_dic["wall"] = materials.load(File.expand_path('../../Material/wall.skm', __FILE__))
-            @@material_dic["window"] = materials.load(File.expand_path('../../Material/window.skm', __FILE__))
-            @@material_dic["railing"] = materials.load(File.expand_path('../../Material/railing.skm', __FILE__))
-          end
-        end
-
         # 全刷新
         def self.full_refresh(data)
           project_site = data.sites.first
@@ -45,7 +39,7 @@ module Examples
           building.storeys.each{ |storey|
             # 后期在这里做逻辑
             # 创建geometry
-            ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
+            ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey)
           }
         end
 
@@ -56,16 +50,16 @@ module Examples
           # 暂时先假定只有一个building，等后续多建筑后再去扩展
           building = project_site_buildings.first
           # 拿到缓存数据
-          all_cache_storeys = @@model_cache.site.buildings.first.storeys
+          all_cache_storeys = @@model_cache.sites.first.buildings.first.storeys
           building.storeys.each{ |storey|
             cache_storeys = all_cache_storeys.select{ |o| o.build_element.root.globalId == storey.build_element.root.globalId }
             if !cache_storeys.nil? and cache_storeys.length == 1
               cache_storey = cache_storeys.first
               if cache_storey != storey
-                ThTCHStoreyFactory.incremental_update_floor(Sketchup.active_model, data.root.globalId, storey, cache_storey, @@material_dic)
+                ThTCHStoreyFactory.incremental_update_floor(Sketchup.active_model, data.root.globalId, storey, cache_storey)
               end
             else
-              ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey, @@material_dic)
+              ThTCHStoreyFactory.full_refresh_floor(Sketchup.active_model, data.root.globalId, storey)
             end
             
           }
@@ -75,7 +69,6 @@ module Examples
     class ThSUProjectBuilder
       def self.building_project(data)
         if data.is_a?(ThSUProjectData)
-          ThTCHProjectBuilder.check_material
           self.full_refresh(data)
         end
       end
