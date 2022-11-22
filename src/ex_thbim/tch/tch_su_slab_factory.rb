@@ -5,7 +5,7 @@ module Examples
   module ThTCH2SUSLABFACTORY
     module_function
 
-    def to_su_slab(entities, slab, material)
+    def to_su_slab(entities, slab)
       begin
       slab_build_element = slab.build_element
       slab_group = entities.add_group
@@ -50,7 +50,7 @@ module Examples
           end
       }
       slab_group.definition.add_classification("IFC 2x3", "IfcSlab")
-      slab_group.material = material
+      slab_group.material = $material_slab
       slab_group.name = "板"
       slab_group.description = slab_build_element.root.globalId
       slab_group.locked = true
