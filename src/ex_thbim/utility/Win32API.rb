@@ -2,7 +2,7 @@ require 'fiddle'
 require 'fiddle/import'
 require 'fiddle/types'
 
-module Examples
+module ThBM
 
   module Win32API
 

@@ -1,10 +1,10 @@
 require 'sketchup.rb'
 require_relative 'tch_su_geom_utils.rb'
+require_relative 'global_config.rb'
 
-module Examples
+module ThBM
   module ThTCH2SUELEMENTFACTORY
     module_function
-
     def to_su_element(entities, definition, element)
       begin
         element_group = entities.add_group
@@ -24,25 +24,25 @@ module Examples
           case element.component.ifc_classification
           when "IfcWall"
             element_group.definition.add_classification("IFC 2x3", "IfcWall")
-            element_group.material = $material_wall
+            element_group.material = GlobalConfiguration.material_wall
           when "IfcWindow"
             element_group.definition.add_classification("IFC 2x3", "IfcWindow")
-            element_group.material = $material_window
+            element_group.material = GlobalConfiguration.material_window
           when "IfcDoor"
             element_group.definition.add_classification("IFC 2x3", "IfcDoor")
-            element_group.material = $material_door
+            element_group.material = GlobalConfiguration.material_door
           when "IfcBeam"
             element_group.definition.add_classification("IFC 2x3", "IfcBeam")
-            element_group.material = $material_beam
+            element_group.material = GlobalConfiguration.material_beam
           when "IfcColumn"
             element_group.definition.add_classification("IFC 2x3", "IfcColumn")
-            element_group.material = $material_column
+            element_group.material = GlobalConfiguration.material_column
           when "IfcSlab"
             element_group.definition.add_classification("IFC 2x3", "IfcSlab")
-            element_group.material = $material_slab
+            element_group.material = GlobalConfiguration.material_slab
           when "IfcRailing"
             element_group.definition.add_classification("IFC 2x3", "IfcRailing")
-            element_group.material = $material_railing
+            element_group.material = GlobalConfiguration.material_railing
           end
         end
         element_group.entities.grep(Sketchup::Edge).each{ |e|
@@ -64,5 +64,5 @@ module Examples
       end
     end
   end # module HelloCube
-end # module Examples
+end # module ThBM
 

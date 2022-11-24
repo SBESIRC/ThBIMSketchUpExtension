@@ -1,6 +1,6 @@
 require_relative 'Win32API.rb'
 
-module Examples
+module ThBM
 
   class Pipe
     include Win32API

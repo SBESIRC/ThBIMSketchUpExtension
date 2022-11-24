@@ -11,8 +11,8 @@ require_relative 'tch/tch_su_project_builder'
 require_relative 'tch/protobuf_extension'
 require_relative 'utility/client.rb'
 
-module Examples
-  module HelloCube
+module ThBM
+  module Main
     @PipeTimerID = 0
     @PipeTimerFlag = false
 
@@ -199,4 +199,4 @@ module Examples
       # file_loaded(__FILE__)
     end
   end # module HelloCube
-end # module Examples
+end # module ThBM

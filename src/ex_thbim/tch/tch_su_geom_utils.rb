@@ -1,7 +1,7 @@
 require 'sketchup.rb'
 # require 'ThTCH2SUGeomUtil'
 
-module Examples
+module ThBM
   module ThTCH2SUGeomUtil
     module_function
 
@@ -210,4 +210,4 @@ module Examples
     end
 
   end
-end # module Examples
+end # module ThBM

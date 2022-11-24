@@ -2,7 +2,7 @@ require_relative 'pipe.rb'
 require_relative 'Win32API.rb'
 
 # The Win32 module serves as a namespace only
-module Examples
+module ThBM
 
   # The Pipe::Client class encapsulates the client side of a named pipe
   # connection.

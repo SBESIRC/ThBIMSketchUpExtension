@@ -1,6 +1,6 @@
 require 'sketchup.rb'
 
-module Examples
+module ThBM
     module ThProtoBufExtention
         module_function
         def to_proto_material(material)
@@ -220,4 +220,4 @@ module Examples
         end
 
     end # module ThProtoBufExtention
-end # module Examples
+end # module ThBM

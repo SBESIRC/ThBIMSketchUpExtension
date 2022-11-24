@@ -1,10 +1,9 @@
 require 'sketchup.rb'
 require_relative 'tch_su_geom_utils.rb'
 
-module Examples
+module ThBM
   module ThTCH2SUWALLFACTORY
     module_function
-
     def to_su_wall(entities, wall)
       wall_build_element = wall.build_element
       wall_group = entities.add_group
@@ -36,7 +35,7 @@ module Examples
         door_face.reverse! if door_face.normal.z < 0 ; # flip face to up if facing down
         door_face.pushpull(door_build_element.height.mm)
         door_group.definition.add_classification("IFC 2x3", "IfcDoor")
-        door_group.material = $material_door
+        door_group.material = GlobalConfiguration.material_door
         door_group.name = "门"
         door_group.description = door_build_element.root.globalId
         door_group.locked = true
@@ -67,13 +66,13 @@ module Examples
         window_group.name = "窗"
         window_group.description = window_build_element.root.globalId
         window_group.definition.add_classification("IFC 2x3", "IfcWindow")
-        window_group.material = $material_window
+        window_group.material = GlobalConfiguration.material_window
         window_group.locked = true
       }
       wall_group.definition.add_classification("IFC 2x3", "IfcWall")
       wall_group.name = "墙"
       wall_group.description = wall_build_element.root.globalId
-      wall_group.material = $material_wall
+      wall_group.material = GlobalConfiguration.material_wall
       wall_group.locked = true
       transform_wall(wall_group, wall_build_element)
     end
@@ -114,5 +113,5 @@ module Examples
     end
 
   end # module HelloCube
-end # module Examples
+end # module ThBM
 

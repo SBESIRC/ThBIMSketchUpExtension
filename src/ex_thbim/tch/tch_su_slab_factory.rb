@@ -1,10 +1,9 @@
 require 'sketchup.rb'
 require_relative 'tch_su_geom_utils.rb'
 
-module Examples
+module ThBM
   module ThTCH2SUSLABFACTORY
     module_function
-
     def to_su_slab(entities, slab)
       begin
       slab_build_element = slab.build_element
@@ -50,7 +49,7 @@ module Examples
           end
       }
       slab_group.definition.add_classification("IFC 2x3", "IfcSlab")
-      slab_group.material = $material_slab
+      slab_group.material = GlobalConfiguration.material_slab
       slab_group.name = "板"
       slab_group.description = slab_build_element.root.globalId
       slab_group.locked = true
@@ -82,5 +81,5 @@ module Examples
     end
 
   end # module HelloCube
-end # module Examples
+end # module ThBM
 
