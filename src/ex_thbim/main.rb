@@ -86,8 +86,8 @@ module ThBM
         storey_data.root = ThTCHRootData.new
         storey_data.root.globalId = "su_storey_1"
         storey_data.number = 1 #虚拟楼层
-        storey_data.elevation = -1.0e10
-        storey_data.height = 2.0e10
+        storey_data.elevation = 1.0e10
+        storey_data.height = -1.0e10
         storey_data.stdFlr_no = -100
         building_data.storeys.push storey_data
       end
@@ -101,11 +101,14 @@ module ThBM
       }
       if su_project.building.storeys.length == 1 and su_project.building.storeys.first.stdFlr_no == -100
         su_project.building.storeys.first.stdFlr_no = 1
+        su_project.building.storeys.first.elevation = su_project.building.storeys.first.elevation.floor
+        su_project.building.storeys.first.height = su_project.building.storeys.first.height.ceil
       else
         first_storey = su_project.building.storeys.first
         last_storey = su_project.building.storeys.last
         if first_storey.stdFlr_no == -100
           first_storey.stdFlr_no = su_project.building.storeys[1].stdFlr_no - 1
+          first_storey.elevation = first_storey.elevation.floor
           first_storey.height = su_project.building.storeys[1].elevation - first_storey.elevation
           if first_storey.stdFlr_no == 0
             first_storey.stdFlr_no = -1
@@ -113,6 +116,7 @@ module ThBM
         end
         if last_storey.stdFlr_no == -100
           last_storey.stdFlr_no = su_project.building.storeys[su_project.building.storeys.length - 2].stdFlr_no + 1
+          last_storey.height = last_storey.height.ceil
         end
       end
 
