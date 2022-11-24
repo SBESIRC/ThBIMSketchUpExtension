@@ -62,17 +62,22 @@ module ThBM
                 file_full_path = File::join(file_path, file_name)
                 json_string = File.read(file_full_path)
                 json = JSON.parse(json_string)
-                json.each{ |obj|
+                for i in 0..json.length - 1
+                  obj = json[i]
                   storey_data = ThSUBuildingStoreyData.new
                   storey_data.root = ThTCHRootData.new
                   storey_data.root.globalId = "su_storey_" + obj["No"].to_s
                   storey_data.root.name = obj["Name"]
                   storey_data.number = obj["No"]
                   storey_data.elevation = obj["Elevation"]
-                  storey_data.height = obj["Height"]
+                  if i == json.length - 1
+                    storey_data.height = obj["Height"] + obj["Highest"]
+                  else
+                    storey_data.height = obj["Height"]
+                  end
                   storey_data.stdFlr_no = obj["StdFlrNo"]
                   building_data.storeys.push storey_data
-                }
+                end
                 break
               end
             }
