@@ -19,9 +19,9 @@ module ThBM
 
         def to_proto_point3d(pt)
             proto_pt = ThTCHPoint3d.new
-            proto_pt.x = pt.x.to_mm
-            proto_pt.y = pt.y.to_mm
-            proto_pt.z = pt.z.to_mm
+            proto_pt.x = pt.x.to_mm.round(5)
+            proto_pt.y = pt.y.to_mm.round(5)
+            proto_pt.z = pt.z.to_mm.round(5)
             proto_pt
         end
 
@@ -35,9 +35,9 @@ module ThBM
 
         def to_proto_vector3d(v)
             proto_v = ThTCHVector3d.new
-            proto_v.x = v.x
-            proto_v.y = v.y
-            proto_v.z = v.z
+            proto_v.x = v.x.to_mm.round(5)
+            proto_v.y = v.y.to_mm.round(5)
+            proto_v.z = v.z.to_mm.round(5)
             proto_v
         end
 
@@ -59,9 +59,9 @@ module ThBM
             proto_matrix.data33 = arr[10]
             proto_matrix.data34 = arr[11]
       
-            proto_matrix.data41 = arr[12].to_mm
-            proto_matrix.data42 = arr[13].to_mm
-            proto_matrix.data43 = arr[14].to_mm
+            proto_matrix.data41 = arr[12].to_mm.round(5)
+            proto_matrix.data42 = arr[13].to_mm.round(5)
+            proto_matrix.data43 = arr[14].to_mm.round(5)
             proto_matrix.data44 = arr[15]
       
             proto_matrix
