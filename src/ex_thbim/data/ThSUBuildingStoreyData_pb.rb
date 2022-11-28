@@ -15,6 +15,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :height, :double, 4
       optional :elevation, :double, 5
       optional :stdFlr_no, :int32, 6
+      optional :highest, :double, 7
     end
   end
 end

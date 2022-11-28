@@ -70,10 +70,11 @@ module ThBM
                   storey_data.root.name = obj["Name"]
                   storey_data.number = obj["No"]
                   storey_data.elevation = obj["Elevation"]
+                  storey_data.height = obj["Height"]
                   if i == json.length - 1
-                    storey_data.height = obj["Height"] + obj["Highest"]
+                    storey_data.highest = obj["Highest"]
                   else
-                    storey_data.height = obj["Height"]
+                    storey_data.highest = 0
                   end
                   storey_data.stdFlr_no = obj["StdFlrNo"]
                   building_data.storeys.push storey_data
@@ -94,6 +95,7 @@ module ThBM
         storey_data.elevation = 1.0e10
         storey_data.height = -1.0e10
         storey_data.stdFlr_no = -100
+        storey_data.highest = 0
         building_data.storeys.push storey_data
       end
       su_project.building = building_data

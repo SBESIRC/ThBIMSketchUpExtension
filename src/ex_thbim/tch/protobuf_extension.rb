@@ -123,6 +123,7 @@ module ThBM
                                 storey_data.number = su_project.building.storeys.first.number - 1
                                 storey_data.elevation = minz
                                 storey_data.height = 0
+                                storey_data.highest = 0
                                 storey_data.stdFlr_no = -100
                                 if storey_data.number == 0
                                     storey_data.number = -1
@@ -136,12 +137,13 @@ module ThBM
                             if storey.stdFlr_no == -100
                                 storey.buildings.push su_component_data
                                 storey.height = [storey.height, maxz - storey.elevation].max
-                            elsif storey.elevation + storey.height - 20 < minz
+                            elsif storey.elevation + storey.height + storey.highest - 20 < minz
                                 storey_data = ThSUBuildingStoreyData.new
                                 storey_data.root = ThTCHRootData.new
                                 storey_data.number = su_project.building.storeys.last.number + 1
-                                storey_data.elevation = storey.elevation + storey.height
+                                storey_data.elevation = storey.elevation + storey.height + storey.highest
                                 storey_data.height = maxz - storey_data.elevation
+                                storey_data.highest = 0
                                 storey_data.stdFlr_no = -100
                                 storey_data.root.globalId = "su_storey_" + storey_data.number.to_s
                                 storey_data.buildings.push su_component_data
