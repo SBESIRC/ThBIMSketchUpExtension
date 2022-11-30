@@ -156,13 +156,13 @@ module ThBM
     end
 
     def self.Show_ToolBar
-      toolbar = UI::Toolbar.new "CAD插件"                   # 创建一个名为Test工具条
+      toolbar = UI::Toolbar.new "天华SU插件"                   # 创建一个名为Test工具条
       if toolbar.visible? and toolbar.length > 0
         toolbar.hide
       else
         if toolbar.length < 1
           # Command1
-          command_tool1 = UI::Command.new("开启CAD监听") {           # 创建一个工具名为Test的命令
+          command_tool1 = UI::Command.new("开启监听") {           # 创建一个工具名为Test的命令
               if(@PipeTimerFlag == false)
                 self.StartWin32PipeMonitor
               else
@@ -178,18 +178,18 @@ module ThBM
               MF_UNCHECKED
             end
           }
-          command_tool1.tooltip = "Turn on CAD monitoring"                      # 对该工具的一些说明
-          command_tool1.status_bar_text = "开启 CAD 监听" # 在状态栏中显示的内容
+          command_tool1.tooltip = "Turn on monitoring"                      # 对该工具的一些说明
+          command_tool1.status_bar_text = "开启 监听" # 在状态栏中显示的内容
 
           # Command2
-          command_tool2 = UI::Command.new("推送数据至Viewer") {           # 创建一个工具名为Test的命令
+          command_tool2 = UI::Command.new("推送数据至平台") {           # 创建一个工具名为Test的命令
             message = self.get_su_build_info
             self.push_to_viewer(message)
           }
           command_tool2.small_icon = "Img/ToViewer.png"             # 工具在工具条上显示的图标
           command_tool2.large_icon = "Img/ToViewer.png"
-          command_tool2.tooltip = "Push To Viewer"                      # 对该工具的一些说明
-          command_tool2.status_bar_text = "推送至 Viewer" # 在状态栏中显示的内容
+          command_tool2.tooltip = "Push To Platform3D"                      # 对该工具的一些说明
+          command_tool2.status_bar_text = "推送至 平台" # 在状态栏中显示的内容
 
           toolbar = toolbar.add_item command_tool1                     # 将Tool1添加到工具条上
           toolbar = toolbar.add_separator                              # 添加分隔符
@@ -202,7 +202,7 @@ module ThBM
     # Main
     unless file_loaded?(__FILE__)
       menu = UI.menu('Tools')
-      menu.add_item('CAD插件') {
+      menu.add_item('天华SU插件') {
         self.Show_ToolBar
       }
       # 主动调用一次使ToolBar先显示出来
