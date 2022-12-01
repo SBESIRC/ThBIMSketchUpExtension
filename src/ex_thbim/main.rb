@@ -3,13 +3,14 @@
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/tch")
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/data")
 $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/vendor")
-require 'sketchup.rb'
-require 'json'
-require 'google/protobuf'
-require_relative 'data/ProtobufMessage_pb'
-require_relative 'tch/tch_su_project_builder'
-require_relative 'tch/protobuf_extension'
-require_relative 'utility/client.rb'
+$LOAD_PATH.unshift("#{File.dirname(__FILE__)}/utility")
+Sketchup.require 'sketchup.rb'
+Sketchup.require 'json'
+Sketchup.require 'google/protobuf'
+Sketchup.require 'ProtobufMessage_pb'
+Sketchup.require 'tch_su_project_builder'
+Sketchup.require 'protobuf_extension'
+Sketchup.require 'client'
 
 module ThBM
   module Main

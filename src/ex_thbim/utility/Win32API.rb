@@ -1,6 +1,6 @@
-require 'fiddle'
-require 'fiddle/import'
-require 'fiddle/types'
+Sketchup.require 'fiddle'
+Sketchup.require 'fiddle/import'
+Sketchup.require 'fiddle/types'
 
 module ThBM
 

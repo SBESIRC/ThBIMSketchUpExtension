@@ -1,8 +1,8 @@
-require 'sketchup.rb'
-require_relative 'tch_su_wall_factory.rb'
-require_relative 'tch_su_slab_factory.rb'
-require_relative 'tch_su_element_factory.rb'
-require_relative 'tch_su_railing_factory.rb'
+Sketchup.require 'sketchup'
+Sketchup.require 'tch_su_wall_factory'
+Sketchup.require 'tch_su_slab_factory'
+Sketchup.require 'tch_su_element_factory'
+Sketchup.require 'tch_su_railing_factory'
 
 module ThBM
   class ThTCHStoreyFactory

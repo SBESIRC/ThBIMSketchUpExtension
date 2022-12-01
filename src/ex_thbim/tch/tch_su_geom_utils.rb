@@ -1,4 +1,4 @@
-require 'sketchup.rb'
+Sketchup.require 'sketchup'
 # require 'ThTCH2SUGeomUtil'
 
 module ThBM

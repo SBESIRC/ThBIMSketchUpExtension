@@ -1,4 +1,4 @@
-require 'sketchup.rb'
+Sketchup.require 'sketchup'
 
 module ThBM
     module ThProtoBufExtention
