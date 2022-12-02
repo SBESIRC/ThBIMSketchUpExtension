@@ -1,5 +1,5 @@
-Sketchup.require 'sketchup'
-Sketchup.require 'tch_su_geom_utils'
+require 'sketchup.rb'
+require_relative 'tch_su_geom_utils.rb'
 
 module ThBM
   module ThTCH2SUSLABFACTORY

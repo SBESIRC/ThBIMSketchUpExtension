@@ -1,4 +1,4 @@
-Sketchup.require 'Win32API'
+require_relative 'Win32API.rb'
 
 module ThBM
 

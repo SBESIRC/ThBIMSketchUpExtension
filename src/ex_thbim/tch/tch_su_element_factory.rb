@@ -1,6 +1,6 @@
-Sketchup.require 'sketchup'
-Sketchup.require 'tch_su_geom_utils'
-Sketchup.require 'global_config'
+require 'sketchup.rb'
+require_relative 'tch_su_geom_utils.rb'
+require_relative 'global_config.rb'
 
 module ThBM
   module ThTCH2SUELEMENTFACTORY
