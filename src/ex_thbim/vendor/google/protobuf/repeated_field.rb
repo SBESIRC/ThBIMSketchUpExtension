@@ -28,7 +28,7 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'forwardable'
+Sketchup.require 'forwardable'
 
 #
 # This class makes RepeatedField act (almost-) like a Ruby Array.

@@ -6,7 +6,7 @@
 # This circular require is intentional to avoid missing dependency.
 begin
   old_verbose, $VERBOSE = $VERBOSE, nil
-  require 'google/protobuf/descriptor_pb'
+  Sketchup.require 'google/protobuf/descriptor_pb'
 ensure
   $VERBOSE = old_verbose
 end

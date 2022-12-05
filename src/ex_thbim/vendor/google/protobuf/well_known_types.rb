@@ -29,11 +29,11 @@
 # (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
-require 'google/protobuf/any_pb'
-require 'google/protobuf/duration_pb'
-require 'google/protobuf/field_mask_pb'
-require 'google/protobuf/struct_pb'
-require 'google/protobuf/timestamp_pb'
+Sketchup.require 'google/protobuf/any_pb'
+Sketchup.require 'google/protobuf/duration_pb'
+Sketchup.require 'google/protobuf/field_mask_pb'
+Sketchup.require 'google/protobuf/struct_pb'
+Sketchup.require 'google/protobuf/timestamp_pb'
 
 module Google
   module Protobuf

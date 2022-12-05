@@ -1,5 +1,5 @@
-require_relative 'pipe.rb'
-require_relative 'Win32API.rb'
+Sketchup.require 'pipe'
+Sketchup.require 'Win32API'
 
 # The Win32 module serves as a namespace only
 module ThBM

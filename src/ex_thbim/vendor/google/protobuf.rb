@@ -29,7 +29,7 @@
 # OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 # require mixins before we hook them into the java & c code
-require 'google/protobuf/message_exts'
+Sketchup.require 'google/protobuf/message_exts'
 
 # We define these before requiring the platform-specific modules.
 # That way the module init can grab references to these.
@@ -53,8 +53,8 @@ else
 
 end
 
-require 'google/protobuf/descriptor_dsl'
-require 'google/protobuf/repeated_field'
+Sketchup.require 'google/protobuf/descriptor_dsl'
+Sketchup.require 'google/protobuf/repeated_field'
 
 module Google
   module Protobuf

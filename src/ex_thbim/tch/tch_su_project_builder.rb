@@ -1,5 +1,5 @@
 require 'sketchup.rb'
-require_relative 'tch_su_storey_factory.rb'
+Sketchup.require 'tch_su_storey_factory'
 
 module ThBM
   class ThTCHProjectBuilder
