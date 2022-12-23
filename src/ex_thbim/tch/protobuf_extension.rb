@@ -70,7 +70,7 @@ module ThBM
         def to_proto_definition_data(su_project, ent, tr, hashcode)
             definition = ent.definition
             su_component_definition = ThSUCompDefinitionData.new
-            if definition.name != "Laura" and !definition.name.include?("ThDefinition")
+            if definition.name != "Laura" and !definition.name.include?("ThDefinition") and !definition.name.include?(".dwg")
                 su_definition_index = su_project.definitions.index{ |d| d.definition_name == definition.name}
                 minz = 1.0e8
                 maxz = -1.0e8
