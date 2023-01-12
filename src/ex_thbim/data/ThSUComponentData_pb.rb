@@ -4,6 +4,7 @@
 require 'google/protobuf'
 
 require 'ThTCHGeometry_pb'
+require 'ThSUMaterialData_pb'
 
 Google::Protobuf::DescriptorPool.generated_pool.build do
   add_file("ThSUComponentData.proto", :syntax => :proto3) do
@@ -12,6 +13,7 @@ Google::Protobuf::DescriptorPool.generated_pool.build do
       optional :ifc_classification, :string, 2
       optional :instance_name, :string, 3
       optional :transformations, :message, 4, "ThTCHMatrix3d"
+      optional :material, :message, 5, "ThSUMaterialData"
     end
   end
 end
