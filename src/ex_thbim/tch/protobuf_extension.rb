@@ -157,7 +157,8 @@ module ThBM
                             first_storey.elevation = [first_storey.elevation, minz].min
                             first_storey.height = [first_storey.height, maxz - first_storey.elevation].max
                         else
-                            storey_index = su_project.building.storeys.rindex{ |o| minz > o.elevation - 20}
+                            centerz = (minz + maxz) / 2
+                            storey_index = su_project.building.storeys.rindex{ |o| centerz > o.elevation}
                             if storey_index.nil?
                                 first_storey = su_project.building.storeys.first
                                 if first_storey.stdFlr_no == -100
@@ -183,7 +184,7 @@ module ThBM
                                 if storey.stdFlr_no == -100
                                     storey.buildings.push su_component_data
                                     storey.height = [storey.height, maxz - storey.elevation].max
-                                elsif storey.elevation + storey.height + storey.highest - 20 < minz
+                                elsif storey.elevation + storey.height + storey.highest < centerz
                                     storey_data = ThSUBuildingStoreyData.new
                                     storey_data.root = ThTCHRootData.new
                                     storey_data.number = su_project.building.storeys.last.number + 1

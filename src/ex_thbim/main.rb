@@ -99,11 +99,11 @@ module ThBM
                   storey_data.root = ThTCHRootData.new
                   storey_data.root.globalId = obj["StoreyName"]
                   storey_data.root.name = obj["PaperName"]
-                  storey_data.number = obj["FloorNo"]
+                  storey_data.number = obj["FloorNo"].to_i
                   storey_data.elevation = obj["Bottom_Elevation"]
                   storey_data.height = obj["Height"]
                   storey_data.highest = 0
-                  storey_data.stdFlr_no = obj["StdFlrNo"]
+                  storey_data.stdFlr_no = obj["StdFlrNo"].to_i
                   building_data.storeys.push storey_data
                 end
                 break
