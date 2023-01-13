@@ -1,0 +1,22 @@
+{
+  "sources": [
+    "github.com"
+  ],
+  "libraries": [
+    {
+      "name": "cmty-lib",
+      "version": "0.0.6",
+      "source": "https://github.com/Eneroth3/sketchup-community-lib.git"
+    }
+  ],
+  "modules": [
+
+  ],
+  "name": "Untitled",
+  "description": "",
+  "namespace": "Untitled",
+  "basename": "Untitled",
+  "author": "Unknown",
+  "copyright": "Copyright (c) 2022",
+  "license": "None"
+}
