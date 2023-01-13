@@ -6,6 +6,7 @@ $LOAD_PATH.unshift("#{File.dirname(__FILE__)}/vendor")
 require 'sketchup.rb'
 require 'json'
 require 'google/protobuf'
+require_relative 'tch/su_extraction_engine'
 require_relative 'data/ProtobufMessage_pb'
 require_relative 'tch/tch_su_project_builder'
 require_relative 'tch/protobuf_extension'
@@ -44,98 +45,16 @@ module ThBM
 
     # 获取SU构建信息并发送至Viewer
     def self.get_su_build_info
-      su_project = ThSUProjectData.new
-      su_project.root = ThTCHRootData.new
-      su_project.root.name = "空项目"
-      su_project.root.globalId = "su_test_pipe_data"
-      su_project.is_face_mesh = false
-      su_project.project_path = Sketchup.active_model.path
-      building_data = ThSUBuildingData.new
       begin
-        skpfile = Sketchup.active_model.path
-        if skpfile.length > 0
-          su_project.root.name = File.basename(skpfile, ".*")
-          file_path = File.expand_path('../../YDB/',skpfile)
-          cad_file_path = File.expand_path('../../IFC/',skpfile)
-          find_storey_config = false
-          if File.directory? file_path
-            Dir.entries(file_path, encoding:'UTF-8').each{ |file_name|
-              if file_name.include? ".ifc.json"
-                file_full_path = File::join(file_path, file_name)
-                json_string = File.read(file_full_path)
-                json = JSON.parse(json_string)
-                for i in 0..json.length - 1
-                  obj = json[i]
-                  storey_data = ThSUBuildingStoreyData.new
-                  storey_data.root = ThTCHRootData.new
-                  storey_data.root.globalId = "su_storey_" + obj["No"].to_s
-                  storey_data.root.name = obj["Name"]
-                  storey_data.number = obj["No"]
-                  storey_data.elevation = obj["Elevation"]
-                  storey_data.height = obj["Height"]
-                  if i == json.length - 1
-                    storey_data.highest = obj["Highest"]
-                  else
-                    storey_data.highest = 0
-                  end
-                  storey_data.stdFlr_no = obj["StdFlrNo"]
-                  building_data.storeys.push storey_data
-                end
-                find_storey_config = true
-                break
-              end
-            }
-          end
-          if !find_storey_config and File.directory? cad_file_path
-            Dir.entries(cad_file_path, encoding:'UTF-8').each{ |file_name|
-              if file_name.include? ".StoreyInfo.json"
-                file_full_path = File::join(cad_file_path, file_name)
-                json_string = File.read(file_full_path)
-                json = JSON.parse(json_string)
-                key, value = json.first
-                for i in 0..value.length - 1
-                  obj = value[i]
-                  storey_data = ThSUBuildingStoreyData.new
-                  storey_data.root = ThTCHRootData.new
-                  storey_data.root.globalId = obj["StoreyName"]
-                  storey_data.root.name = obj["PaperName"]
-                  storey_data.number = obj["FloorNo"].to_i
-                  storey_data.elevation = obj["Bottom_Elevation"]
-                  storey_data.height = obj["Height"]
-                  storey_data.highest = 0
-                  storey_data.stdFlr_no = obj["StdFlrNo"].to_i
-                  building_data.storeys.push storey_data
-                end
-                break
-              end
-            }
-          end
-
-        end
+        engine = SUExtractionEngine.new
+        engine.extract_storey_config
+        engine.extract_active_model_data
+        su_project = engine.get_project
+        view_hash_data = engine.get_stair_view_data
+        file = Sketchup.active_model.path
       rescue => e
         e.message
       end
-      if building_data.storeys.length == 0
-        storey_data = ThSUBuildingStoreyData.new
-        storey_data.root = ThTCHRootData.new
-        storey_data.root.globalId = "su_storey_1"
-        storey_data.number = 1 #虚拟楼层
-        storey_data.elevation = 1.0e10
-        storey_data.height = -1.0e10
-        storey_data.stdFlr_no = -100
-        storey_data.highest = 0
-        building_data.storeys.push storey_data
-      end
-      su_project.building = building_data
-      entities = Sketchup.active_model.entities
-      view_hash_data = { "剖面视图" => [] , "平面视图" => []}
-      entities.each{ |ent|
-        if ent.is_a?(Sketchup::Group) or ent.is_a?(Sketchup::ComponentInstance)
-          code = ThProtoBufExtention.get_hash_code(2166136261, ent.entityID)
-          definition_datas = ThProtoBufExtention.to_proto_definition_data(su_project, ent, ent.transformation, code, view_hash_data)
-        end
-      }
-      file = Sketchup.active_model.path
       if file.length > 0
         file_path = File.dirname(file)
         file_basename = File.basename(file, ".*")
