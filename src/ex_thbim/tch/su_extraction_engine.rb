@@ -206,6 +206,11 @@ module ThBM
                             first_storey.height = [first_storey.height, maxz - first_storey.elevation].max
                         else
                             centerz = (minz + maxz) / 2
+                            # 临时逻辑：对SU的横向构建(梁/板),判断归属楼层的时候，按下降500去判断归属
+                            # 为了去应对梁板的翻高现象
+                            if ent.layer.name == "S_BEAM" or ent.layer.name == "S_SLAB" or ent.layer.name == "S_FLOOR"
+                                centerz = centerz - 500
+                            end
                             storey_index = @@su_project.building.storeys.rindex{ |o| centerz > o.elevation}
                             if storey_index.nil?
                                 first_storey = @@su_project.building.storeys.first
